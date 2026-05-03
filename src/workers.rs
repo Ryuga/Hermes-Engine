@@ -2,7 +2,7 @@ use crossbeam_channel::{bounded, Receiver, Sender};
 use std::process::Command;
 use std::path::PathBuf;
 use std::io::Result;
-
+use std::fs;
 
 pub struct IsolateBox {
     pub id: i8,
@@ -23,6 +23,21 @@ impl IsolateBox {
     }
     pub fn cleanup(&self) -> Result<()>{
         // TODO
+        // Remove all temp files without unmounting.
+        if self.path.exists(){
+            for entry in fs::read_dir(&self.path)? {
+                let entry = entry?;
+                let path = entry.path();
+                if path.is_dir() {
+                    fs::remove_dir_all(path)?;
+                } else {
+                    fs::remove_file(path)?;
+            }
+        }
+        // Kill all process for that user.
+        let _ = Command::new("pkill")
+            .args(["-9", "-u", format!("isolate-{}", self.id)])
+            .output();
         Ok(())
     }
 }
