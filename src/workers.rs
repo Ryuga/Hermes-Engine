@@ -22,9 +22,8 @@ impl IsolateBox {
         }
     }
     pub fn cleanup(&self) -> Result<()>{
-        // TODO
         // Remove all temp files without unmounting.
-        if self.path.exists(){
+        if self.path.exists() {
             for entry in fs::read_dir(&self.path)? {
                 let entry = entry?;
                 let path = entry.path();
@@ -32,6 +31,7 @@ impl IsolateBox {
                     fs::remove_dir_all(path)?;
                 } else {
                     fs::remove_file(path)?;
+                }
             }
         }
         // Kill all process for that user.
