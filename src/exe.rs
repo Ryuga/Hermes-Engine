@@ -35,7 +35,7 @@ pub fn execute_code(isolate_box: &IsolateBox, req: Req, passed_token: Option<Str
         Ok(p) => p,
         Err(e) => {
             return Ok(Resp{
-                output: String::new(),
+                output: "Program preparation failed".to_string(),
                 std_log: e,
                 code: 1,
                 time_ms: 0
