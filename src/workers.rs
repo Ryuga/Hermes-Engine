@@ -36,7 +36,7 @@ impl IsolateBox {
         }
         // Kill all process for that user.
         let _ = Command::new("pkill")
-            .args(["-9", "-u", format!("isolate-{}", self.id)])
+            .args(["-9", "-u", format!("isolate-{}", self.id.to_string()).as_str()])
             .output();
         Ok(())
     }
@@ -53,7 +53,7 @@ impl BoxManager {
                 .expect("Failed to execute command. Verify isolate installation.");
 
             if !status.success() {
-                panic!(format!("Failed to initialize box {}", i));
+                panic!("{}", format!("Failed to initialize box {}", i.to_string()));
             }
 
             let b = IsolateBox::new(i);
