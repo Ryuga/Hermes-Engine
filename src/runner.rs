@@ -35,8 +35,8 @@ pub fn safe_execute(isolate_box: &IsolateBox,
 
     // Metafile for job
     // TODO: read exit code
-    let meta_path = format!("/tmp/isolate_{}.meta", isolate_box.id);
-    cmd.arg("--meta").arg(&meta_path);
+    // let meta_path = format!("/tmp/isolate_{}.meta", isolate_box.id);
+    // cmd.arg("--meta").arg(&meta_path);
 
     // Exec
     cmd.arg("--run");
