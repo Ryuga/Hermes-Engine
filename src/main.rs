@@ -3,6 +3,7 @@ mod runner;
 mod loader;
 mod models;
 mod languages;
+mod workers;
 
 use std::env;
 use dotenvy::dotenv;
