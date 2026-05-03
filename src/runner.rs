@@ -29,7 +29,7 @@ pub fn safe_execute(isolate_box: &IsolateBox,
     cmd.arg("--processes").arg(config.max_processes.to_string());
 
     // Environment
-    cmd.arg("--silent");
+    // cmd.arg("--silent");
     cmd.arg("--env=PATH=/usr/bin:/bin");
     cmd.arg("--env=HOME=/tmp");
 
