@@ -1,15 +1,18 @@
 use serde::{Deserialize, Deserializer, Serialize};
 use serde::de::Error;
+use std::sync::Arc;
+use crate::workers::BoxManager;
 
 fn default_vector() -> Vec<String> { vec![] }
 fn default_compile() -> bool { false }
 fn default_authenticate() -> bool { false }
 fn default_time_limit() -> u64 { 2 }
 fn default_cpu_time_sec() -> u64 { 2 }
-fn default_memory_mb() -> u64 { 256 }
-fn default_stack_mb() -> u64 { 16 }
-fn default_processes() -> u64 { 8 }
+fn default_memory_kb() -> u64 { 256 * 1024 }
+fn default_stack_kb() -> u64 { 64 * 1024 }
+fn default_processes() -> u64 { 16 }
 fn default_open_files() -> u64 { 64 }
+fn default_file_size_kb() -> u64 { 1024 }
 fn default_output_kb() -> u64 { 1024 }
 
 
@@ -29,10 +32,11 @@ pub struct LangConfig {
 
     pub max_time_limit: u64,
     pub max_cpu_time_sec: u64,
-    pub max_memory_mb: u64,
-    pub max_stack_mb: u64,
+    pub max_memory_kb: u64,
+    pub max_stack_kb: u64,
     pub max_processes: u64,
     pub max_open_files: u64,
+    pub max_file_size_kb: u64,
     pub max_output_kb: u64,
 }
 
@@ -63,17 +67,20 @@ pub struct RawLangConfig {
     #[serde(default = "default_cpu_time_sec")]
     pub max_cpu_time_sec: u64,
 
-    #[serde(default = "default_memory_mb")]
-    pub max_memory_mb: u64,
+    #[serde(default = "default_memory_kb")]
+    pub max_memory_kb: u64,
 
-    #[serde(default = "default_stack_mb")]
-    pub max_stack_mb: u64,
+    #[serde(default = "default_stack_kb")]
+    pub max_stack_kb: u64,
 
     #[serde(default = "default_processes")]
     pub max_processes: u64,
 
     #[serde(default = "default_open_files")]
     pub max_open_files: u64,
+
+    #[serde(default = "default_file_size_kb")]
+    pub max_file_size_kb: u64,
 
     #[serde(default = "default_output_kb")]
     pub max_output_kb: u64,
@@ -105,10 +112,11 @@ impl<'de> Deserialize<'de> for LangConfig {
                 runtime_args: raw.runtime_args,
                 max_time_limit: raw.max_time_limit,
                 max_cpu_time_sec: raw.max_cpu_time_sec,
-                max_memory_mb: raw.max_memory_mb,
-                max_stack_mb: raw.max_stack_mb,
+                max_memory_kb: raw.max_memory_kb,
+                max_stack_kb: raw.max_stack_kb,
                 max_processes: raw.max_processes,
                 max_open_files: raw.max_open_files,
+                max_file_size_kb: raw.max_file_size_kb,
                 max_output_kb: raw.max_output_kb,
             })
     }
@@ -127,4 +135,14 @@ pub struct Resp {
     pub output: String,
     pub std_log: String,
     pub time_ms: u128,
+}
+
+pub struct AppState {
+    pub box_manager: Arc<BoxManager>,
+}
+
+impl AppState {
+    pub fn new(box_manager: Arc<BoxManager>) -> Self {
+        AppState { box_manager }
+    }
 }
