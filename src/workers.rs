@@ -48,8 +48,9 @@ impl BoxManager {
         let (tx, rx) = bounded(count as usize);
 
         for i in 0..count{
+            //TODO: Add warning for control group per kernel version
             let status = Command::new("isolate")
-                .args(["--box-id", &i.to_string(), "--init"]).status()
+                .args(["--box-id", &i.to_string(), "--cg", "--init"]).status()
                 .expect("Failed to execute command. Verify isolate installation.");
 
             if !status.success() {
