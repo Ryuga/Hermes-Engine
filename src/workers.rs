@@ -18,7 +18,7 @@ impl IsolateBox {
     pub fn new(id: i8) -> IsolateBox {
         Self {
             id,
-            path: PathBuf::from(format!("/var/local/lib/isolate/{}/box", id)),
+            path: PathBuf::from(format!("/var/lib/isolate/{}/box", id)),
         }
     }
     pub fn cleanup(&self) -> Result<()>{
