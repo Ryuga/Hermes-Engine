@@ -64,9 +64,9 @@
     "runtime_args": [],
     "max_time_limit": 5,
     "max_cpu_time_sec": 3,
-    "max_memory_kb": 393216,
-    "max_stack_kb": 16384,
-    "max_processes": 1,
+    "max_memory_kb": 100000,
+    "max_stack_kb": 2048,
+    "max_processes": 12,
     "max_open_files": 32
   }
 }
