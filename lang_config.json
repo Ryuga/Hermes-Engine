@@ -36,19 +36,26 @@
     "source": "Main.java",
     "compile": true,
     "authenticate": false,
-    "compiler_path": "/usr/bin/javac",
-    "compiler_args": [],
-    "runtime_path": "/usr/bin/java",
-    "runtime_args": [
-      "-XX:-UseCompressedOops",
-      "-XX:-UseCompressedClassPointers"
+    "compiler_path": "/usr/lib/jvm/java-21-openjdk-amd64/bin/javac",
+    "compiler_args": [
+      "-J-Xmx128m",
+      "-J-Xms128m",
+      "-J-XX:MaxMetaspaceSize=64m"
     ],
-    "max_time_limit": 8,
-    "max_cpu_time_sec": 8,
-    "max_memory_kb": 2097152,
+    "runtime_path": "/usr/lib/jvm/java-21-openjdk-amd64/bin/java",
+    "runtime_args": [
+      "-Xmx128m",
+      "-Xms128m",
+      "-XX:MaxMetaspaceSize=64m",
+      "-XX:ReservedCodeCacheSize=32m",
+      "-Xss512k",
+      "-XX:-UseCompressedOops"
+    ],
+    "max_time_limit": 5,
+    "max_cpu_time_sec": 5,
+    "max_memory_kb": 256000,
     "max_stack_kb": 32768,
-    "max_processes": 16,
-    "max_open_files": 128
+    "max_processes": 16
   },
   "cpp": {
     "source": "solution.cpp",
