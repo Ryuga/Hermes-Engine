@@ -45,11 +45,10 @@
     ],
     "max_time_limit": 8,
     "max_cpu_time_sec": 8,
-    "max_memory_kb": 2048,
-    "max_stack_kb": 32,
+    "max_memory_kb": 2097152,
+    "max_stack_kb": 32768,
     "max_processes": 16,
-    "max_open_files": 128,
-    "max_output_kb": 1024
+    "max_open_files": 128
   },
   "cpp": {
     "source": "solution.cpp",
@@ -65,8 +64,8 @@
     "runtime_args": [],
     "max_time_limit": 5,
     "max_cpu_time_sec": 3,
-    "max_memory_kb": 512,
-    "max_stack_kb": 64,
+    "max_memory_kb": 393216,
+    "max_stack_kb": 16384,
     "max_processes": 1,
     "max_open_files": 32
   }
