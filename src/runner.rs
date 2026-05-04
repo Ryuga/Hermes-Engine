@@ -3,6 +3,7 @@ use std::path::Path;
 use std::process::Command;
 use tokio::time::Instant;
 use tracing::debug;
+use tracing_subscriber::fmt::format;
 use crate::models::LangConfig;
 use crate::workers::IsolateBox;
 
@@ -16,18 +17,19 @@ pub fn safe_execute(isolate_box: &IsolateBox,
     // Box config
     cmd.arg("--box-id").arg(&isolate_box.id.to_string());
     cmd.arg("--cg");
+    cmd.arg("--net=none");
 
     // Resource limit enforcement
-    cmd.arg("--mem").arg(config.max_memory_kb.to_string());
-    cmd.arg("--time").arg(config.max_cpu_time_sec.to_string());
-    cmd.arg("--wall-time").arg(config.max_time_limit.to_string());
-    cmd.arg("--extra-time").arg("2");
-    cmd.arg("--stack").arg(config.max_stack_kb.to_string());
-    cmd.arg("--open-files").arg(config.max_open_files.to_string());
-    cmd.arg("--fsize").arg(config.max_file_size_kb.to_string());
-    cmd.arg("--quota").arg("20000,2000"); // To be reviewed and adjusted
-    cmd.arg("--core").arg("1024"); // 1MB for core dump to be reviewed and adjusted
-    cmd.arg("--processes").arg(config.max_processes.to_string());
+    cmd.arg(format!("--mem={}", config.max_memory_kb));
+    cmd.arg(format!("--time={}", config.max_cpu_time_sec));
+    cmd.arg(format!("--wall-time={}", config.max_time_limit));
+    cmd.arg(format!("--extra-time={}", "2")); // To be adjusted per lang
+    cmd.arg(format!("--stack={}", config.max_stack_kb));
+    cmd.arg(format!("--open-files={}", config.max_open_files));
+    cmd.arg(format!("--fsize={}", config.max_file_size_kb));
+    cmd.arg(format!("--quota={}", "20000,2000")); // To be reviewed and adjusted
+    cmd.arg(format!("--core={}", "1024")); // 1MB for core dump to be reviewed and adjusted
+    cmd.arg(format!("--processes={}", config.max_processes.to_string()));
 
     // Environment
     // cmd.arg("--silent");
@@ -37,7 +39,7 @@ pub fn safe_execute(isolate_box: &IsolateBox,
     // Metafile for job
     // TODO: read exit code
     let meta_path = format!("/tmp/isolate_{}.meta", isolate_box.id);
-    cmd.arg("--meta").arg(&meta_path);
+    cmd.arg(format!("--meta={}", &meta_path));
 
     cmd.arg("--run");
     cmd.arg("--");
