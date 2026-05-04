@@ -8,9 +8,7 @@ FROM rustlang/rust:nightly-bookworm AS builder
 WORKDIR /app
 RUN cargo install cargo-chef
 COPY --from=planner /app/recipe.json recipe.json
-
 RUN cargo chef cook --release --recipe-path recipe.json
-
 COPY . .
 RUN cargo build --release
 
@@ -18,42 +16,43 @@ RUN cargo build --release
 FROM debian:bookworm-slim
 WORKDIR /app
 
-# Install runtimes
+# Install Runtimes and Repo Tools
 RUN apt-get update && apt-get install -y \
     python3 \
     nodejs \
     default-jre-headless \
-    libcap-dev \
-    make \
-    gcc \
-    git \
+    curl \
+    gnupg \
+    procps \
     && rm -rf /var/lib/apt/lists/*
 
-# Install isolate
-RUN git clone https://github.com/ioi/isolate.git /tmp/isolate \
-    && cd /tmp/isolate \
-    && make \
-    && make install BINDIR=/usr/bin CONFIGDIR=/etc \
-    && rm -rf /tmp/isolate \
+# Setup Isolate Repository
+RUN mkdir -p /etc/apt/keyrings && \
+    curl https://www.ucw.cz/isolate/debian/signing-key.asc > /etc/apt/keyrings/isolate.asc
 
-# Copy isolate.conf to /etc
+RUN echo "Types: deb\n\
+URIs: http://www.ucw.cz/isolate/debian/\n\
+Suites: trixie-isolate\n\
+Components: main\n\
+Architectures: amd64\n\
+Signed-By: /etc/apt/keyrings/isolate.asc" > /etc/apt/sources.list.d/isolate.sources
+
+# Update and Install Isolate
+RUN apt-get update && apt-get install -y isolate && rm -rf /var/lib/apt/lists/*
+
+# Configuration & Permissions
 COPY config/isolate.conf /etc/isolate.conf
-
 RUN chown root:root /usr/bin/isolate && chmod 4755 /usr/bin/isolate
 
-# Ensure Java has a valid home and is on the path
+# Runtime Environment Setup
 ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
+# Ensure directories match your Rust PathBuf logic
+RUN mkdir -p /tmp && chmod 1777 /tmp && \
+    mkdir -p /var/lib/isolate && chmod 700 /var/lib/isolate
 
-# Explicitly create the temp directory Java often wants
-RUN mkdir -p /tmp && chmod 1777 /tmp
-
-# Create dir for isolate boxes
-RUN mkdir -p /var/lib/isolate && chmod 700 /var/lib/isolate
-
-
-
+# Deploy Hermes
 COPY --from=builder /app/target/release/Hermes /usr/bin/Hermes
 
-CMD ["Hermes"]
+CMD ["/usr/bin/Hermes"]
