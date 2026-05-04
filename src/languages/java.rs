@@ -5,11 +5,11 @@ use crate::languages::{LanguageHandler, PreparedProgram};
 use crate::models::LangConfig;
 
 pub struct JavaHandler {
-    config: LangConfig,
+    config: &'static LangConfig,
 }
 
 impl JavaHandler {
-    pub fn new(config: LangConfig) -> Self {
+    pub fn new(config: &'static LangConfig) -> Self {
         Self { config }
     }
 

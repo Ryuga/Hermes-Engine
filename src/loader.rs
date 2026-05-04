@@ -13,6 +13,6 @@ static LANG_CONFIG: Lazy<HashMap<String, LangConfig>> = Lazy::new(|| {
         .expect("invalid lang_config.json")
 });
 
-pub fn get_lang_config(lang: &String) -> &'static LangConfig {
+pub fn get_lang_config(lang: &str) -> &'static LangConfig {
     LANG_CONFIG.get(lang).unwrap_or_else(|| panic!("Unsupported language: {}", lang))
 }

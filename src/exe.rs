@@ -28,7 +28,7 @@ pub fn execute_code(isolate_box: &IsolateBox, req: Req, passed_token: Option<Str
         }
     }
 
-    let handler = get_handler(req.language.as_str(), lang_config.clone());
+    let handler = get_handler(&req.language);
 
     let work_dir = &isolate_box.path;
 

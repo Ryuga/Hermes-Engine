@@ -4,11 +4,11 @@ use crate::languages::{LanguageHandler, PreparedProgram};
 use crate::models::LangConfig;
 
 pub struct JavascriptHandler {
-    config: LangConfig,
+    config: &'static LangConfig,
 }
 
 impl JavascriptHandler {
-    pub fn new(config: LangConfig) -> Self {
+    pub fn new(config: &'static LangConfig) -> Self {
         Self { config }
     }
 }

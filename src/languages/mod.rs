@@ -8,6 +8,7 @@ use crate::languages::cpp::CppHandler;
 use crate::languages::java::JavaHandler;
 use crate::languages::javascript::JavascriptHandler;
 use crate::languages::python::PythonHandler;
+use crate::loader::get_lang_config;
 use crate::models::LangConfig;
 
 pub struct PreparedProgram {
@@ -21,7 +22,9 @@ pub trait LanguageHandler {
     fn run_cmd(&self, prepared: &PreparedProgram) -> Vec<String>;
 }
 
-pub fn get_handler(lang: &str, config: LangConfig) -> Box<dyn LanguageHandler> {
+pub fn get_handler(lang: &str) -> Box<dyn LanguageHandler> {
+    let config = get_lang_config(lang);
+
     match lang {
         "python" => Box::new(PythonHandler::new(config)),
         "javascript" => Box::new(JavascriptHandler::new(config)),
