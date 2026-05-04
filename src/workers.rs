@@ -48,6 +48,11 @@ impl BoxManager {
         let (tx, rx) = bounded(count as usize);
 
         for i in 0..count{
+            // Clean up previous boxes on restart.
+            let _ = Command::new("isolate")
+                .args(["--box-id", &i.to_string(), "--cg", "--cleanup"])
+                .status();
+
             //TODO: Add warning for control group per kernel version
             let status = Command::new("isolate")
                 .args(["--box-id", &i.to_string(), "--cg", "--init"]).status()
