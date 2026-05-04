@@ -123,13 +123,13 @@ impl<'de> Deserialize<'de> for LangConfig {
 }
 
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Req {
     pub language: String,
     pub code: String
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 pub struct Resp {
     pub code: i32,
     pub output: String,

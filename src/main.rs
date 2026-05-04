@@ -19,7 +19,7 @@ use http::{Method, header::CONTENT_TYPE, HeaderValue};
 use once_cell::sync::Lazy;
 use tokio::sync::Semaphore;
 use tracing_subscriber::{fmt, EnvFilter};
-use tracing::info;
+use tracing::{debug, info};
 use std::sync::Arc;
 use axum::extract::State;
 
@@ -83,6 +83,7 @@ async fn execution_handler(
     headers: axum::http::HeaderMap,
     Json(req): Json<Req>
 ) -> Result<Json<Resp>, StatusCode> {
+    debug!("Executing request req: {:?}", req);
 
     let manager = state.box_manager.clone();
 

@@ -1,4 +1,5 @@
 use tempfile::tempdir;
+use tracing::debug;
 use crate::languages::get_handler;
 use crate::loader::get_lang_config;
 use crate::models::{Req, Resp};
@@ -31,6 +32,7 @@ pub fn execute_code(isolate_box: &IsolateBox, req: Req, passed_token: Option<Str
 
     let work_dir = &isolate_box.path;
 
+    debug!("Preparing programing for execution");
     let program = match handler.prepare(work_dir, &req.code) {
         Ok(p) => p,
         Err(e) => {
@@ -43,6 +45,7 @@ pub fn execute_code(isolate_box: &IsolateBox, req: Req, passed_token: Option<Str
         }
     };
 
+    debug!("Finalizing execution command");
     let exe_cmd = if lang_config.compile {
         format!(
             "{} && {}",
@@ -54,6 +57,7 @@ pub fn execute_code(isolate_box: &IsolateBox, req: Req, passed_token: Option<Str
         handler.run_cmd(&program).join(" ")
     };
 
+    debug!("Executing command: {}", exe_cmd);
     let (output, std_log, code, time_ms) =
         safe_execute(&isolate_box, lang_config.clone(), exe_cmd)?;
 
