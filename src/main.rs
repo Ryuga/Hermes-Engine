@@ -16,8 +16,6 @@ use crate::exe::execute_code;
 use crate::workers::{BoxManager};
 use tower_http::cors::{CorsLayer};
 use http::{Method, header::CONTENT_TYPE, HeaderValue};
-use once_cell::sync::Lazy;
-use tokio::sync::Semaphore;
 use tracing_subscriber::{fmt, EnvFilter};
 use tracing::{debug, info};
 use std::sync::Arc;

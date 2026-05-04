@@ -1,4 +1,3 @@
-use tempfile::tempdir;
 use tracing::debug;
 use crate::languages::get_handler;
 use crate::loader::get_lang_config;
@@ -45,21 +44,25 @@ pub fn execute_code(isolate_box: &IsolateBox, req: Req, passed_token: Option<Str
         }
     };
 
-    debug!("Finalizing execution command");
-    let exe_cmd = if lang_config.compile {
-        format!(
-            "{} && {}",
-            handler.compile_cmd(&program).join(" "),
-            handler.run_cmd(&program).join(" ")
-        )
+    if lang_config.compile {
+        debug!("Compiling program");
+        let compile_args = handler.compile_cmd(&program);
+        let (out, log, code, _) = safe_execute(isolate_box, lang_config, &compile_args)?;
+        if code != 0 {
+            return Ok(Resp {
+                output: out,
+                std_log: format!("Compilation Error:\n{}", log),
+                code,
+                time_ms: 0,
+            });
+        }
     }
-    else {
-        handler.run_cmd(&program).join(" ")
-    };
 
-    debug!("Executing command: {}", exe_cmd);
+    debug!("Finalizing execution command");
+    let run_args = handler.run_cmd(&program);
+
     let (output, std_log, code, time_ms) =
-        safe_execute(&isolate_box, &lang_config, &exe_cmd)?;
+        safe_execute(&isolate_box, &lang_config, &run_args)?;
 
     Ok(Resp{output, std_log, code, time_ms})
 }

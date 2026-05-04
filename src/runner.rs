@@ -1,15 +1,13 @@
 use std::env;
-use std::path::Path;
 use std::process::Command;
 use tokio::time::Instant;
 use tracing::debug;
-use tracing_subscriber::fmt::format;
 use crate::models::LangConfig;
 use crate::workers::IsolateBox;
 
 pub fn safe_execute(isolate_box: &IsolateBox,
                     config: &LangConfig,
-                    run_cmd: &String
+                    run_args: &[String]
 ) -> Result<(String, String, i32, u128), String> {
     let start = Instant::now();
 
@@ -43,9 +41,9 @@ pub fn safe_execute(isolate_box: &IsolateBox,
     cmd.arg("--run");
     cmd.arg("--");
 
-    cmd.arg("/bin/sh");
-    cmd.arg("-c");
-    cmd.arg(&run_cmd);
+    for arg in run_args {
+        cmd.arg(arg);
+    }
 
     debug!("Executing: {:?}", cmd);
 
