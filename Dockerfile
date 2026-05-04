@@ -52,6 +52,11 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
 RUN mkdir -p /tmp && chmod 1777 /tmp && \
     mkdir -p /var/lib/isolate && chmod 700 /var/lib/isolate
 
+# Copy lang_config
+COPY lang_config.json /app/lang_config.json
+# Copy .env if present
+COPY .env* /app/
+
 # Deploy Hermes
 COPY --from=builder /app/target/release/Hermes /usr/bin/Hermes
 
