@@ -25,16 +25,18 @@ impl LanguageHandler for PythonHandler {
         )
     }
     fn compile_cmd(&self, _: &PreparedProgram) -> Vec<String> {
-        println!("Ignoring compilation for python...");
-        unimplemented!()
+        vec![]
     }
 
     fn run_cmd(&self, prepared: &PreparedProgram) -> Vec<String> {
-        let file_name = prepared.entry_file.
-            file_name().unwrap().to_string_lossy().to_string();
+        let file_name = prepared.entry_file
+            .file_name()
+            .map(|n| n.to_string_lossy().into_owned())
+            .unwrap_or_default();
 
-        let mut cmd = vec![self.config.runtime_path.clone()];
-        cmd.extend(self.config.runtime_args.clone());
+        let mut cmd = Vec::with_capacity(2 + self.config.runtime_args.len());
+        cmd.push(self.config.runtime_path.clone());
+        cmd.extend(self.config.runtime_args.iter().cloned());
         cmd.push(file_name);
         cmd
     }
