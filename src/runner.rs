@@ -17,7 +17,6 @@ pub fn safe_execute(isolate_box: &IsolateBox,
     // Box config
     cmd.arg("--box-id").arg(&isolate_box.id.to_string());
     cmd.arg("--cg");
-    cmd.arg("--net=none");
 
     // Resource limit enforcement
     cmd.arg(format!("--mem={}", config.max_memory_kb));
