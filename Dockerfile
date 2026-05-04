@@ -1,46 +1,59 @@
-FROM --platform=linux/amd64 rustlang/rust:nightly-bookworm AS builder
-
-RUN apt-get update && apt-get install -y \
-    pkg-config \
-    libssl-dev \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
-
+FROM rustlang/rust:nightly-bookworm AS planner
 WORKDIR /app
+RUN cargo install cargo-chef
 COPY . .
+RUN cargo chef prepare --recipe-path recipe.json
 
+FROM rustlang/rust:nightly-bookworm AS builder
+WORKDIR /app
+RUN cargo install cargo-chef
+COPY --from=planner /app/recipe.json recipe.json
+
+RUN cargo chef cook --release --recipe-path recipe.json
+
+COPY . .
 RUN cargo build --release
 
-FROM --platform=linux/amd64 ubuntu:24.04
-
-ENV DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get update && apt-get install -y \
-    curl \
-    ca-certificates \
-    openjdk-21-jdk \
-    python3 \
-    nodejs \
-    && mkdir -p /etc/apt/keyrings
-
-RUN curl https://www.ucw.cz/isolate/debian/signing-key.asc > /etc/apt/keyrings/isolate.asc
-
-RUN echo "Types: deb\n\
-URIs: http://www.ucw.cz/isolate/debian/\n\
-Suites: noble-isolate\n\
-Components: main\n\
-Architectures: amd64\n\
-Signed-By: /etc/apt/keyrings/isolate.asc" > /etc/apt/sources.list.d/isolate.sources
-
-RUN apt-get update && apt-get install -y isolate
-
+# Deployment
+FROM debian:bookworm-slim
 WORKDIR /app
 
-COPY --from=builder /app/target/release/Hermes .
+# Install runtimes
+RUN apt-get update && apt-get install -y \
+    python3 \
+    nodejs \
+    default-jre-headless \
+    libcap-dev \
+    make \
+    gcc \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install isolate
+RUN git clone https://github.com/ioi/isolate.git /tmp/isolate \
+    && cd /tmp/isolate \
+    && make \
+    && make install BINDIR=/usr/bin CONFIGDIR=/etc \
+    && rm -rf /tmp/isolate \
+
+# Copy isolate.conf to /etc
 COPY config/isolate.conf /etc/isolate.conf
 
-RUN chmod u+s /usr/bin/isolate
+RUN chown root:root /usr/bin/isolate && chmod 4755 /usr/bin/isolate
 
+# Ensure Java has a valid home and is on the path
 ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
-CMD ["./Hermes"]
+
+# Explicitly create the temp directory Java often wants
+RUN mkdir -p /tmp && chmod 1777 /tmp
+
+# Create dir for isolate boxes
+RUN mkdir -p /var/lib/isolate && chmod 700 /var/lib/isolate
+
+
+
+COPY --from=builder /app/target/release/Hermes /usr/bin/Hermes
+
+CMD ["Hermes"]
