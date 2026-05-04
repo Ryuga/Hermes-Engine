@@ -12,8 +12,7 @@
     "max_memory_mb": 256,
     "max_stack_mb": 16,
     "max_processes": 8,
-    "max_open_files": 64,
-    "max_output_kb": 1024
+    "max_open_files": 64
   },
   "javascript": {
     "source": "main.js",
@@ -28,8 +27,7 @@
     "max_memory_mb": 2048,
     "max_stack_mb": 32,
     "max_processes": 16,
-    "max_open_files": 128,
-    "max_output_kb": 1024
+    "max_open_files": 128
   },
   "java": {
     "source": "Main.java",
@@ -67,7 +65,6 @@
     "max_memory_mb": 512,
     "max_stack_mb": 64,
     "max_processes": 1,
-    "max_open_files": 32,
-    "max_output_kb": 2048
+    "max_open_files": 32
   }
 }

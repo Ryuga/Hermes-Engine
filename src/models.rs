@@ -13,7 +13,6 @@ fn default_stack_kb() -> u64 { 64 * 1024 }
 fn default_processes() -> u64 { 16 }
 fn default_open_files() -> u64 { 64 }
 fn default_file_size_kb() -> u64 { 1024 }
-fn default_output_kb() -> u64 { 1024 }
 
 
 #[derive(Clone)]
@@ -62,28 +61,26 @@ pub struct RawLangConfig {
     pub runtime_args: Vec<String>,
 
     #[serde(default = "default_time_limit")]
-    pub max_time_limit: u64,
+    pub max_time_limit: String,
 
     #[serde(default = "default_cpu_time_sec")]
-    pub max_cpu_time_sec: u64,
+    pub max_cpu_time_sec: String,
 
     #[serde(default = "default_memory_kb")]
-    pub max_memory_kb: u64,
+    pub max_memory_kb: String,
 
     #[serde(default = "default_stack_kb")]
-    pub max_stack_kb: u64,
+    pub max_stack_kb: String,
 
     #[serde(default = "default_processes")]
-    pub max_processes: u64,
+    pub max_processes: String,
 
     #[serde(default = "default_open_files")]
-    pub max_open_files: u64,
+    pub max_open_files: String,
 
     #[serde(default = "default_file_size_kb")]
-    pub max_file_size_kb: u64,
+    pub max_file_size_kb: String,
 
-    #[serde(default = "default_output_kb")]
-    pub max_output_kb: u64,
 }
 
 
@@ -117,7 +114,6 @@ impl<'de> Deserialize<'de> for LangConfig {
                 max_processes: raw.max_processes,
                 max_open_files: raw.max_open_files,
                 max_file_size_kb: raw.max_file_size_kb,
-                max_output_kb: raw.max_output_kb,
             })
     }
 }
