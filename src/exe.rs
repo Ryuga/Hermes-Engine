@@ -59,7 +59,7 @@ pub fn execute_code(isolate_box: &IsolateBox, req: Req, passed_token: Option<Str
 
     debug!("Executing command: {}", exe_cmd);
     let (output, std_log, code, time_ms) =
-        safe_execute(&isolate_box, lang_config.clone(), exe_cmd)?;
+        safe_execute(&isolate_box, &lang_config.clone(), &exe_cmd)?;
 
     Ok(Resp{output, std_log, code, time_ms})
 }

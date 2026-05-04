@@ -8,8 +8,8 @@ use crate::models::LangConfig;
 use crate::workers::IsolateBox;
 
 pub fn safe_execute(isolate_box: &IsolateBox,
-                    config: LangConfig,
-                    run_cmd: String
+                    config: &LangConfig,
+                    run_cmd: &String
 ) -> Result<(String, String, i32, u128), String> {
     let start = Instant::now();
 
