@@ -1,5 +1,6 @@
 use std::fs;
 use std::path::Path;
+use tracing::warn;
 use crate::languages::{LanguageHandler, PreparedProgram};
 use crate::models::LangConfig;
 
@@ -25,6 +26,7 @@ impl LanguageHandler for PythonHandler {
         )
     }
     fn compile_cmd(&self, _: &PreparedProgram) -> Vec<String> {
+        warn!("No compilation required for python");
         vec![]
     }
 
