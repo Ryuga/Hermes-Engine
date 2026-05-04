@@ -2,6 +2,7 @@ use std::env;
 use std::path::Path;
 use std::process::Command;
 use tokio::time::Instant;
+use tracing::debug;
 use crate::models::LangConfig;
 use crate::workers::IsolateBox;
 
@@ -44,6 +45,8 @@ pub fn safe_execute(isolate_box: &IsolateBox,
     cmd.arg("/bin/sh");
     cmd.arg("-c");
     cmd.arg(&run_cmd);
+
+    debug!("Executing: {:?}", cmd);
 
     let out = cmd.output().map_err(|e| e.to_string())?;
     let time_ms = start.elapsed().as_millis();
