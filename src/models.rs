@@ -3,6 +3,19 @@ use serde::de::Error;
 use std::sync::Arc;
 use crate::workers::BoxManager;
 
+fn string_or_int<'de, D>(deserializer: D) -> Result<String, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    use serde_json::Value;
+
+    match Value::deserialize(deserializer)? {
+        Value::String(s) => Ok(s),
+        Value::Number(n) => Ok(n.to_string()),
+        _ => Err(D::Error::custom("expected string or integer")),
+    }
+}
+
 fn default_vector() -> Vec<String> { vec![] }
 fn default_compile() -> bool { false }
 fn default_authenticate() -> bool { false }
@@ -59,25 +72,25 @@ pub struct RawLangConfig {
     #[serde(default = "default_vector")]
     pub runtime_args: Vec<String>,
 
-    #[serde(default = "default_time_limit")]
+    #[serde(default = "default_time_limit",deserialize_with = "string_or_int")]
     pub max_time_limit: String,
 
-    #[serde(default = "default_cpu_time_sec")]
+    #[serde(default = "default_cpu_time_sec",deserialize_with = "string_or_int")]
     pub max_cpu_time_sec: String,
 
-    #[serde(default = "default_memory_kb")]
+    #[serde(default = "default_memory_kb",deserialize_with = "string_or_int")]
     pub max_memory_kb: String,
 
-    #[serde(default = "default_stack_kb")]
+    #[serde(default = "default_stack_kb",deserialize_with = "string_or_int")]
     pub max_stack_kb: String,
 
-    #[serde(default = "default_processes")]
+    #[serde(default = "default_processes",deserialize_with = "string_or_int")]
     pub max_processes: String,
 
-    #[serde(default = "default_open_files")]
+    #[serde(default = "default_open_files",deserialize_with = "string_or_int")]
     pub max_open_files: String,
 
-    #[serde(default = "default_file_size_kb")]
+    #[serde(default = "default_file_size_kb",deserialize_with = "string_or_int")]
     pub max_file_size_kb: String,
 
 }
