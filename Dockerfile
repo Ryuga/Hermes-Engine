@@ -32,7 +32,7 @@ RUN mkdir -p /etc/apt/keyrings && \
 
 RUN echo "Types: deb\n\
 URIs: http://www.ucw.cz/isolate/debian/\n\
-Suites: trixie-isolate\n\
+Suites: bookworm-isolate\n\
 Components: main\n\
 Architectures: amd64\n\
 Signed-By: /etc/apt/keyrings/isolate.asc" > /etc/apt/sources.list.d/isolate.sources
