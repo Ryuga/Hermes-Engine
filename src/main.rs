@@ -83,7 +83,7 @@ async fn execution_handler(
     headers: axum::http::HeaderMap,
     Json(req): Json<Req>
 ) -> Result<Json<Resp>, StatusCode> {
-    debug!("Executing request req: {:?}", req);
+    debug!("Received request: {:?}", req);
 
     let manager = state.box_manager.clone();
 

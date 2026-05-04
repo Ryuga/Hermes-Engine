@@ -13,7 +13,7 @@ pub fn safe_execute(isolate_box: &IsolateBox,
 
     let mut cmd = Command::new("isolate");
     // Box config
-    cmd.args(["--box-id", &isolate_box.id.to_string()]);
+    cmd.arg("--box-id").arg(&isolate_box.id.to_string());
     cmd.arg("--cg");
 
     // Resource limit enforcement
@@ -35,12 +35,15 @@ pub fn safe_execute(isolate_box: &IsolateBox,
 
     // Metafile for job
     // TODO: read exit code
-    // let meta_path = format!("/tmp/isolate_{}.meta", isolate_box.id);
-    // cmd.arg("--meta").arg(&meta_path);
+    let meta_path = format!("/tmp/isolate_{}.meta", isolate_box.id);
+    cmd.arg("--meta").arg(&meta_path);
 
-    // Exec
     cmd.arg("--run");
-    cmd.args(["--", "/bin/sh", "-c", &run_cmd]);
+    cmd.arg("--");
+
+    cmd.arg("/bin/sh");
+    cmd.arg("-c");
+    cmd.arg(&run_cmd);
 
     let out = cmd.output().map_err(|e| e.to_string())?;
     let time_ms = start.elapsed().as_millis();
