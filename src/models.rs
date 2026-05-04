@@ -6,13 +6,13 @@ use crate::workers::BoxManager;
 fn default_vector() -> Vec<String> { vec![] }
 fn default_compile() -> bool { false }
 fn default_authenticate() -> bool { false }
-fn default_time_limit() -> u64 { 2 }
-fn default_cpu_time_sec() -> u64 { 2 }
-fn default_memory_kb() -> u64 { 256 * 1024 }
-fn default_stack_kb() -> u64 { 64 * 1024 }
-fn default_processes() -> u64 { 16 }
-fn default_open_files() -> u64 { 64 }
-fn default_file_size_kb() -> u64 { 1024 }
+fn default_time_limit() -> String { 2.to_string() }
+fn default_cpu_time_sec() -> String { 2.to_string() }
+fn default_memory_kb() -> String { (256 * 1024).to_string() }
+fn default_stack_kb() -> String { (64 * 1024).to_string() }
+fn default_processes() -> String { 16.to_string() }
+fn default_open_files() -> String { 64.to_string() }
+fn default_file_size_kb() -> String { 1024.to_string() }
 
 
 #[derive(Clone)]
@@ -29,14 +29,13 @@ pub struct LangConfig {
     pub runtime_path: String,
     pub runtime_args: Vec<String>,
 
-    pub max_time_limit: u64,
-    pub max_cpu_time_sec: u64,
-    pub max_memory_kb: u64,
-    pub max_stack_kb: u64,
-    pub max_processes: u64,
-    pub max_open_files: u64,
-    pub max_file_size_kb: u64,
-    pub max_output_kb: u64,
+    pub max_time_limit: String,
+    pub max_cpu_time_sec: String,
+    pub max_memory_kb: String,
+    pub max_stack_kb: String,
+    pub max_processes: String,
+    pub max_open_files: String,
+    pub max_file_size_kb: String,
 }
 
 #[derive(Deserialize)]
