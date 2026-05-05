@@ -1,16 +1,31 @@
 use serde::{Deserialize, Deserializer, Serialize};
 use serde::de::Error;
+use std::sync::Arc;
+use crate::workers::BoxManager;
+
+fn string_or_int<'de, D>(deserializer: D) -> Result<String, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    use serde_json::Value;
+
+    match Value::deserialize(deserializer)? {
+        Value::String(s) => Ok(s),
+        Value::Number(n) => Ok(n.to_string()),
+        _ => Err(D::Error::custom("expected string or integer")),
+    }
+}
 
 fn default_vector() -> Vec<String> { vec![] }
 fn default_compile() -> bool { false }
 fn default_authenticate() -> bool { false }
-fn default_time_limit() -> u64 { 2 }
-fn default_cpu_time_sec() -> u64 { 2 }
-fn default_memory_mb() -> u64 { 256 }
-fn default_stack_mb() -> u64 { 16 }
-fn default_processes() -> u64 { 8 }
-fn default_open_files() -> u64 { 64 }
-fn default_output_kb() -> u64 { 1024 }
+fn default_time_limit() -> String { 2.to_string() }
+fn default_cpu_time_sec() -> String { 2.to_string() }
+fn default_memory_kb() -> String { (256 * 1024).to_string() }
+fn default_stack_kb() -> String { (64 * 1024).to_string() }
+fn default_processes() -> String { 16.to_string() }
+fn default_open_files() -> String { 64.to_string() }
+fn default_file_size_kb() -> String { 1024.to_string() }
 
 
 #[derive(Clone)]
@@ -27,13 +42,13 @@ pub struct LangConfig {
     pub runtime_path: String,
     pub runtime_args: Vec<String>,
 
-    pub max_time_limit: u64,
-    pub max_cpu_time_sec: u64,
-    pub max_memory_mb: u64,
-    pub max_stack_mb: u64,
-    pub max_processes: u64,
-    pub max_open_files: u64,
-    pub max_output_kb: u64,
+    pub max_time_limit: String,
+    pub max_cpu_time_sec: String,
+    pub max_memory_kb: String,
+    pub max_stack_kb: String,
+    pub max_processes: String,
+    pub max_open_files: String,
+    pub max_file_size_kb: String,
 }
 
 #[derive(Deserialize)]
@@ -57,26 +72,27 @@ pub struct RawLangConfig {
     #[serde(default = "default_vector")]
     pub runtime_args: Vec<String>,
 
-    #[serde(default = "default_time_limit")]
-    pub max_time_limit: u64,
+    #[serde(default = "default_time_limit",deserialize_with = "string_or_int")]
+    pub max_time_limit: String,
 
-    #[serde(default = "default_cpu_time_sec")]
-    pub max_cpu_time_sec: u64,
+    #[serde(default = "default_cpu_time_sec",deserialize_with = "string_or_int")]
+    pub max_cpu_time_sec: String,
 
-    #[serde(default = "default_memory_mb")]
-    pub max_memory_mb: u64,
+    #[serde(default = "default_memory_kb",deserialize_with = "string_or_int")]
+    pub max_memory_kb: String,
 
-    #[serde(default = "default_stack_mb")]
-    pub max_stack_mb: u64,
+    #[serde(default = "default_stack_kb",deserialize_with = "string_or_int")]
+    pub max_stack_kb: String,
 
-    #[serde(default = "default_processes")]
-    pub max_processes: u64,
+    #[serde(default = "default_processes",deserialize_with = "string_or_int")]
+    pub max_processes: String,
 
-    #[serde(default = "default_open_files")]
-    pub max_open_files: u64,
+    #[serde(default = "default_open_files",deserialize_with = "string_or_int")]
+    pub max_open_files: String,
 
-    #[serde(default = "default_output_kb")]
-    pub max_output_kb: u64,
+    #[serde(default = "default_file_size_kb",deserialize_with = "string_or_int")]
+    pub max_file_size_kb: String,
+
 }
 
 
@@ -105,26 +121,36 @@ impl<'de> Deserialize<'de> for LangConfig {
                 runtime_args: raw.runtime_args,
                 max_time_limit: raw.max_time_limit,
                 max_cpu_time_sec: raw.max_cpu_time_sec,
-                max_memory_mb: raw.max_memory_mb,
-                max_stack_mb: raw.max_stack_mb,
+                max_memory_kb: raw.max_memory_kb,
+                max_stack_kb: raw.max_stack_kb,
                 max_processes: raw.max_processes,
                 max_open_files: raw.max_open_files,
-                max_output_kb: raw.max_output_kb,
+                max_file_size_kb: raw.max_file_size_kb,
             })
     }
 }
 
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Req {
     pub language: String,
     pub code: String
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 pub struct Resp {
     pub code: i32,
     pub output: String,
     pub std_log: String,
     pub time_ms: u128,
+}
+
+pub struct AppState {
+    pub box_manager: Arc<BoxManager>,
+}
+
+impl AppState {
+    pub fn new(box_manager: Arc<BoxManager>) -> Self {
+        AppState { box_manager }
+    }
 }

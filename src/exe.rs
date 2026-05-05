@@ -1,11 +1,13 @@
-use tempfile::tempdir;
+use tracing::debug;
 use crate::languages::get_handler;
 use crate::loader::get_lang_config;
 use crate::models::{Req, Resp};
 use crate::runner::safe_execute;
+use crate::workers::IsolateBox;
 
-pub fn execute_code(req: Req, passed_token: Option<String>) -> Result<Resp, String>{
-    let lang_config = get_lang_config(req.language.as_str());
+
+pub fn execute_code(isolate_box: &IsolateBox, req: Req, passed_token: Option<String>) -> Result<Resp, String>{
+    let lang_config = get_lang_config(&req.language);
 
     if lang_config.authenticate {
         let secret = std::env::var("API_TOKEN")
@@ -25,15 +27,16 @@ pub fn execute_code(req: Req, passed_token: Option<String>) -> Result<Resp, Stri
         }
     }
 
-    let handler = get_handler(req.language.as_str(), lang_config.clone());
+    let handler = get_handler(&req.language);
 
-    let work_dir = tempdir().map_err(|e| e.to_string())?;
+    let work_dir = &isolate_box.path;
 
-    let program = match handler.prepare(work_dir.path(), &req.code) {
+    debug!("Preparing programing for execution");
+    let program = match handler.prepare(work_dir, &req.code) {
         Ok(p) => p,
         Err(e) => {
             return Ok(Resp{
-                output: String::new(),
+                output: "Program preparation failed".to_string(),
                 std_log: e,
                 code: 1,
                 time_ms: 0
@@ -41,13 +44,25 @@ pub fn execute_code(req: Req, passed_token: Option<String>) -> Result<Resp, Stri
         }
     };
 
-    let exe_cmd = if lang_config.compile {
-        format!("{} && {}", handler.compile_cmd(&program).join(" "), handler.run_cmd(&program).join(" "))
+    if lang_config.compile {
+        debug!("Compiling program");
+        let compile_args = handler.compile_cmd(&program);
+        let (out, log, code, _) = safe_execute(isolate_box, lang_config, &compile_args)?;
+        if code != 0 {
+            return Ok(Resp {
+                output: out,
+                std_log: format!("Compilation Error:\n{}", log),
+                code,
+                time_ms: 0,
+            });
+        }
     }
-    else {
-        handler.run_cmd(&program).join(" ")
-    };
 
-    let (output, std_log, code, time_ms) = safe_execute(work_dir.path(), lang_config.clone(), exe_cmd)?;
+    debug!("Finalizing execution command");
+    let run_args = handler.run_cmd(&program);
+
+    let (output, std_log, code, time_ms) =
+        safe_execute(&isolate_box, &lang_config, &run_args)?;
+
     Ok(Resp{output, std_log, code, time_ms})
 }

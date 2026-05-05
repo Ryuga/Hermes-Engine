@@ -9,11 +9,10 @@
     "runtime_args": [],
     "max_time_limit": 2,
     "max_cpu_time_sec": 2,
-    "max_memory_mb": 256,
-    "max_stack_mb": 16,
+    "max_memory_kb": 65536,
+    "max_stack_kb": 8192,
     "max_processes": 8,
-    "max_open_files": 64,
-    "max_output_kb": 1024
+    "max_open_files": 64
   },
   "javascript": {
     "source": "main.js",
@@ -22,33 +21,41 @@
     "compiler_path": "",
     "compiler_args": [],
     "runtime_path": "/usr/bin/node",
-    "runtime_args": ["--max-old-space-size=256"],
-    "max_time_limit": 2,
+    "runtime_args": [
+      "--max-old-space-size=256",
+      "--no-warnings"
+    ],
+    "max_time_limit": 3,
     "max_cpu_time_sec": 2,
-    "max_memory_mb": 2048,
-    "max_stack_mb": 32,
-    "max_processes": 16,
-    "max_open_files": 128,
-    "max_output_kb": 1024
+    "max_memory_kb": 393216,
+    "max_stack_kb": 16384,
+    "max_processes": 64,
+    "max_open_files": 64
   },
   "java": {
     "source": "Main.java",
     "compile": true,
     "authenticate": false,
-    "compiler_path": "/usr/bin/javac",
-    "compiler_args": [],
-    "runtime_path": "/usr/bin/java",
-    "runtime_args": [
-      "-XX:-UseCompressedOops",
-      "-XX:-UseCompressedClassPointers"
+    "compiler_path": "/usr/lib/jvm/java-21-openjdk-amd64/bin/javac",
+    "compiler_args": [
+      "-J-Xmx128m",
+      "-J-Xms128m",
+      "-J-XX:MaxMetaspaceSize=64m"
     ],
-    "max_time_limit": 8,
-    "max_cpu_time_sec": 8,
-    "max_memory_mb": 2048,
-    "max_stack_mb": 32,
-    "max_processes": 16,
-    "max_open_files": 128,
-    "max_output_kb": 1024
+    "runtime_path": "/usr/lib/jvm/java-21-openjdk-amd64/bin/java",
+    "runtime_args": [
+      "-Xmx128m",
+      "-Xms128m",
+      "-XX:MaxMetaspaceSize=64m",
+      "-XX:ReservedCodeCacheSize=32m",
+      "-Xss512k",
+      "-XX:-UseCompressedOops"
+    ],
+    "max_time_limit": 5,
+    "max_cpu_time_sec": 5,
+    "max_memory_kb": 256000,
+    "max_stack_kb": 32768,
+    "max_processes": 16
   },
   "cpp": {
     "source": "solution.cpp",
@@ -64,10 +71,9 @@
     "runtime_args": [],
     "max_time_limit": 5,
     "max_cpu_time_sec": 3,
-    "max_memory_mb": 512,
-    "max_stack_mb": 64,
-    "max_processes": 1,
-    "max_open_files": 32,
-    "max_output_kb": 2048
+    "max_memory_kb": 100000,
+    "max_stack_kb": 2048,
+    "max_processes": 12,
+    "max_open_files": 32
   }
 }
