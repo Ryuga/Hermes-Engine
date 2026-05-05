@@ -1,5 +1,6 @@
 use std::fs;
 use std::path::Path;
+use once_cell::sync::Lazy;
 use regex::Regex;
 use crate::languages::{LanguageHandler, PreparedProgram};
 use crate::models::LangConfig;
@@ -7,6 +8,15 @@ use crate::models::LangConfig;
 pub struct JavaHandler {
     config: &'static LangConfig,
 }
+
+static IMPORT_RE: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r"(?m)^\s*import\s+([a-zA-Z0-9_.]+);").unwrap()
+});
+
+static CLASS_RE: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r"(?m)^\s*public\s+(?:\w+\s+)*class\s+([A-Za-z_][A-Za-z0-9_]*)").unwrap()
+});
+
 
 impl JavaHandler {
     pub fn new(config: &'static LangConfig) -> Self {
@@ -18,9 +28,7 @@ impl JavaHandler {
             return Err("Compilation Error: 'package' declarations are not allowed.".to_string());
         }
 
-        let import_re = Regex::new(r"(?m)^\s*import\s+([a-zA-Z0-9_.]+);").unwrap();
-
-        for matches in import_re.captures_iter(code) {
+        for matches in IMPORT_RE.captures_iter(code) {
             let import = &matches[1];
             if !(import.starts_with("java.")
                 || import.starts_with("javax.")
@@ -35,10 +43,8 @@ impl JavaHandler {
     }
 
     fn extract_main_class_name(code: &str) -> Result<String, String> {
-        let class_re =
-            Regex::new(r"(?m)^\s*public\s+(?:\w+\s+)*class\s+([A-Za-z_][A-Za-z0-9_]*)")
-                .unwrap();
-        let res = class_re.captures(&code)
+
+        let res = CLASS_RE.captures(&code)
             .ok_or("Compilation Error: Java programs must declare a public class.")?;
         Ok(res[1].to_string())
     }
