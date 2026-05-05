@@ -41,6 +41,7 @@ pub struct LangConfig {
 
     pub runtime_path: String,
     pub runtime_args: Vec<String>,
+    pub isolate_args: Vec<String>,
 
     pub max_time_limit: String,
     pub max_cpu_time_sec: String,
@@ -71,6 +72,9 @@ pub struct RawLangConfig {
 
     #[serde(default = "default_vector")]
     pub runtime_args: Vec<String>,
+
+    #[serde(default = "default_vector")]
+    pub isolate_args: Vec<String>,
 
     #[serde(default = "default_time_limit",deserialize_with = "string_or_int")]
     pub max_time_limit: String,
@@ -119,6 +123,7 @@ impl<'de> Deserialize<'de> for LangConfig {
                 compiler_path: raw.compiler_path.unwrap_or_default(),
                 compiler_args: raw.compiler_args,
                 runtime_args: raw.runtime_args,
+                isolate_args: raw.isolate_args,
                 max_time_limit: raw.max_time_limit,
                 max_cpu_time_sec: raw.max_cpu_time_sec,
                 max_memory_kb: raw.max_memory_kb,

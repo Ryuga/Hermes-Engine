@@ -7,6 +7,7 @@
     "compiler_args": [],
     "runtime_path": "/usr/bin/python3",
     "runtime_args": [],
+    "isolate_args": [],
     "max_time_limit": 2,
     "max_cpu_time_sec": 2,
     "max_memory_kb": 65536,
@@ -25,6 +26,7 @@
       "--max-old-space-size=256",
       "--no-warnings"
     ],
+    "isolate_args": [],
     "max_time_limit": 3,
     "max_cpu_time_sec": 2,
     "max_memory_kb": 393216,
@@ -67,6 +69,9 @@
       "-XX:+DisableExplicitGC",
       "-XX:-TieredCompilation"
     ],
+    "isolate_args": [
+      "--dir=/etc:ro"
+    ],
     "max_time_limit": 5,
     "max_cpu_time_sec": 5,
     "max_memory_kb": 500000,
@@ -85,6 +90,7 @@
     ],
     "runtime_path": "",
     "runtime_args": [],
+    "isolate_args": [],
     "max_time_limit": 2,
     "max_cpu_time_sec": 2,
     "max_memory_kb": 100000,
