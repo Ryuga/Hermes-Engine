@@ -1,9 +1,20 @@
 use std::env;
 use std::process::Command;
+use once_cell::sync::Lazy;
 use tokio::time::Instant;
 use tracing::debug;
 use crate::models::LangConfig;
 use crate::workers::IsolateBox;
+
+static DEBUG: Lazy<bool> = Lazy::new(|| {
+    match env::var("RUST_LOG") {
+        Ok(val) => {
+            let v = val.to_lowercase();
+            v == "debug" || v == "full"
+        }
+        Err(_) => false,
+    }
+});
 
 pub fn safe_execute(isolate_box: &IsolateBox,
                     config: &LangConfig,
@@ -16,6 +27,8 @@ pub fn safe_execute(isolate_box: &IsolateBox,
     cmd.arg("--box-id").arg(&isolate_box.id.to_string());
     cmd.arg("--cg");
 
+    cmd.args(&config.isolate_args);
+
     // Resource limit enforcement
     cmd.arg(format!("--mem={}", config.max_memory_kb));
     cmd.arg(format!("--time={}", config.max_cpu_time_sec));
@@ -26,10 +39,12 @@ pub fn safe_execute(isolate_box: &IsolateBox,
     cmd.arg(format!("--fsize={}", config.max_file_size_kb));
     cmd.arg(format!("--quota={}", "20000,2000")); // To be reviewed and adjusted
     cmd.arg(format!("--core={}", "1024")); // 1MB for core dump to be reviewed and adjusted
-    cmd.arg(format!("--processes={}", config.max_processes.to_string()));
+    cmd.arg(format!("--processes={}", config.max_processes));
 
     // Environment
-    // cmd.arg("--silent");
+    if !*DEBUG {
+        cmd.arg("--silent");
+    }
     cmd.arg("--env=PATH=/usr/bin:/bin");
     cmd.arg("--env=HOME=/tmp");
 
@@ -41,11 +56,9 @@ pub fn safe_execute(isolate_box: &IsolateBox,
     cmd.arg("--run");
     cmd.arg("--");
 
-    for arg in run_args {
-        cmd.arg(arg);
-    }
+    cmd.args(run_args);
 
-    debug!("Executing: {:?}", cmd);
+    debug!(?cmd, "Executing isolate command");
 
     let out = cmd.output().map_err(|e| e.to_string())?;
     let time_ms = start.elapsed().as_millis();
