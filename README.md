@@ -211,7 +211,7 @@ Content-Type: application/json
 
 ### Example
 ```bash
-curl -X POST http://127.0.0.1:8000/execute \
+curl -X POST http://127.0.0.1:8000/execute/ \
   -H "Content-Type: application/json" \
   -d '{"language":"python","code":"print(1+1)"}'
 ```

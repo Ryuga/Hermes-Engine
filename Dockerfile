@@ -18,9 +18,10 @@ WORKDIR /app
 
 # Install Runtimes and Repo Tools
 RUN apt-get update && apt-get install -y \
+    build-essential \
     python3 \
     nodejs \
-    default-jre-headless \
+    default-jdk-headless \
     curl \
     gnupg \
     procps \
