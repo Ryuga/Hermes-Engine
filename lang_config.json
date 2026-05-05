@@ -36,13 +36,13 @@
     "source": "Main.java",
     "compile": true,
     "authenticate": false,
-    "compiler_path": "/usr/lib/jvm/java-21-openjdk-amd64/bin/javac",
+    "compiler_path": "/usr/bin/javac",
     "compiler_args": [
       "-J-Xmx128m",
       "-J-Xms128m",
       "-J-XX:MaxMetaspaceSize=64m"
     ],
-    "runtime_path": "/usr/lib/jvm/java-21-openjdk-amd64/bin/java",
+    "runtime_path": "/usr/bin/java",
     "runtime_args": [
       "-Xmx128m",
       "-Xms128m",
