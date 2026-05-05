@@ -6,11 +6,11 @@ use once_cell::sync::Lazy;
 use std::fs;
 
 static LANG_CONFIG: Lazy<HashMap<String, LangConfig>> = Lazy::new(|| {
-    let text = fs::read_to_string("lang_config.json")
-        .expect("lang_config.json missing");
+    let text = fs::read_to_string("config.json")
+        .expect("config.json missing");
 
     serde_json::from_str(&text)
-        .expect("invalid lang_config.json")
+        .expect("invalid config.json")
 });
 
 pub fn get_lang_config(lang: &str) -> &'static LangConfig {

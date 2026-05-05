@@ -53,8 +53,8 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
 RUN mkdir -p /tmp && chmod 1777 /tmp && \
     mkdir -p /var/lib/isolate && chmod 700 /var/lib/isolate
 
-# Copy lang_config
-COPY lang_config.json /app/lang_config.json
+# Copy config
+COPY config.json /app/config.json
 # Copy .env if present
 COPY .env* /app/
 

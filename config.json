@@ -70,7 +70,7 @@
       "-XX:-TieredCompilation"
     ],
     "isolate_args": [
-      "--dir=/etc:ro"
+      "--dir=/etc"
     ],
     "max_time_limit": 5,
     "max_cpu_time_sec": 5,
