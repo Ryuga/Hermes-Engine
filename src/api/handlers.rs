@@ -22,7 +22,7 @@ pub async fn single_execution(
     debug!("Single Execution request: {:?}", req);
 
     let state_ref = Arc::clone(&state);
-    let lang_config = get_lang_config(&req.language);
+    let lang_config = get_lang_config(&req.language).map_err(|_| StatusCode::BAD_REQUEST)?;
 
     let auth_token = headers
         .get(http::header::AUTHORIZATION)

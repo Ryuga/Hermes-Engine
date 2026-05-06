@@ -7,7 +7,17 @@ use crate::config::utils::get_lang_config;
 
 
 pub fn execute_code(isolate_box: &IsolateBox, req: ReqMulti, passed_token: Option<String>) -> Result<Resp, String>{
-    let lang_config = get_lang_config(&req.language);
+    let lang_config = match get_lang_config(&req.language) {
+        Ok(config) => config,
+        Err(e) => return Ok(
+            Resp {
+                output: "Unsupported runtime".to_string(),
+                std_log: e,
+                time_ms: 0,
+                code: 1
+            }
+        )
+    };
 
     if lang_config.authenticate {
         let secret = std::env::var("API_TOKEN")
@@ -27,7 +37,7 @@ pub fn execute_code(isolate_box: &IsolateBox, req: ReqMulti, passed_token: Optio
         }
     }
 
-    let handler = get_handler(&req.language);
+    let handler = get_handler(&req.language).map_err(|e| e)?;
 
     let work_dir = &isolate_box.path;
 

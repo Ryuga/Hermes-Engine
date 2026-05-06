@@ -23,14 +23,15 @@ pub trait LanguageHandler {
     fn run_cmd(&self, prepared: &PreparedProgram) -> Vec<String>;
 }
 
-pub fn get_handler(lang: &str) -> Box<dyn LanguageHandler> {
-    let config = get_lang_config(lang);
+pub fn get_handler(lang: &str) -> Result<Box<dyn LanguageHandler>, String> {
+    let config = get_lang_config(lang)?;
 
-    match lang {
+    let handler: Box<dyn LanguageHandler> = match lang {
         "python" => Box::new(PythonHandler::new(config)),
         "javascript" => Box::new(JavascriptHandler::new(config)),
         "java" => Box::new(JavaHandler::new(config)),
         "cpp" => Box::new(CppHandler::new(config)),
-        _ => panic!("Unsupported language"),
-    }
+        _ => return Err(format!("Unsupported runtime: '{}'", lang)),
+    };
+    Ok(handler)
 }

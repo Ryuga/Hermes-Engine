@@ -17,6 +17,6 @@ where
     }
 }
 
-pub fn get_lang_config(lang: &str) -> &'static LangConfig {
-    LANG_CONFIG.get(lang).unwrap_or_else(|| panic!("Unsupported language: {}", lang))
+pub fn get_lang_config(lang: &str) -> Result<&'static LangConfig, String> {
+    LANG_CONFIG.get(lang).ok_or_else(|| format!("Unsupported language: {}", lang))
 }
