@@ -1,7 +1,7 @@
 use serde::{Deserialize, Deserializer, Serialize};
 use serde::de::Error;
 use std::sync::Arc;
-use crate::workers::BoxManager;
+use crate::core::workers::BoxManager;
 
 fn string_or_int<'de, D>(deserializer: D) -> Result<String, D::Error>
 where

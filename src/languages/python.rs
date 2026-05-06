@@ -2,7 +2,7 @@ use std::fs;
 use std::path::Path;
 use tracing::warn;
 use crate::languages::{LanguageHandler, PreparedProgram};
-use crate::models::LangConfig;
+use crate::config::models::LangConfig;
 
 pub struct PythonHandler {
     config: &'static LangConfig,

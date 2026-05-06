@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::models::LangConfig;
+use crate::config::models::LangConfig;
 
 
 use once_cell::sync::Lazy;

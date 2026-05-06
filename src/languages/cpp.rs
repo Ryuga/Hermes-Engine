@@ -2,7 +2,7 @@ use std::fs;
 use std::path::Path;
 use regex::Regex;
 use crate::languages::{LanguageHandler, PreparedProgram};
-use crate::models::LangConfig;
+use crate::config::models::LangConfig;
 
 pub struct CppHandler {
     config: &'static LangConfig,

@@ -3,8 +3,8 @@ use std::process::Command;
 use once_cell::sync::Lazy;
 use tokio::time::Instant;
 use tracing::debug;
-use crate::models::LangConfig;
-use crate::workers::IsolateBox;
+use crate::config::models::LangConfig;
+use crate::core::workers::IsolateBox;
 
 static DEBUG: Lazy<bool> = Lazy::new(|| {
     match env::var("RUST_LOG") {
