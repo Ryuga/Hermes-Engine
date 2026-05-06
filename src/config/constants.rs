@@ -2,7 +2,7 @@ use std::fs;
 use std::env;
 use std::string::ToString;
 use std::collections::HashMap;
-
+use http::HeaderValue;
 use once_cell::sync::Lazy;
 
 use super::models::LangConfig;
@@ -15,9 +15,20 @@ pub static PORT: Lazy<String> = Lazy::new(||
 );
 
 pub static WORKER_COUNT: Lazy<i8> = Lazy::new(||
-    env::var("WORKER_COUNT").map(|v| v.parse().unwrap_or(8))
+    env::var("WORKER_COUNT")
+        .ok()
+        .and_then(|v| v.parse().ok())
         .unwrap_or(4)
 );
+
+pub static ALLOWED_ORIGINS: Lazy<Vec<HeaderValue>> = Lazy::new(|| {
+    env::var("ALLOWED_ORIGIN")
+        .unwrap_or_else(|_| "http://localhost:3000".to_string())
+        .split(',')
+        .map(|s| s.trim())
+        .filter_map(|s| s.parse::<HeaderValue>().ok())
+        .collect()
+});
 
 pub static LANG_CONFIG: Lazy<HashMap<String, LangConfig>> = Lazy::new(|| {
     let text = fs::read_to_string("config.json")
@@ -29,6 +40,6 @@ pub static LANG_CONFIG: Lazy<HashMap<String, LangConfig>> = Lazy::new(|| {
 
 pub static IS_DEBUG: Lazy<bool> = Lazy::new(|| {
     let val = env::var("RUST_LOG").unwrap_or_default().to_lowercase();
-    val == "debug" || val == "full" || val == "trace"
+    val.contains("debug") || val.contains("full") || val.contains("trace")
 });
 
