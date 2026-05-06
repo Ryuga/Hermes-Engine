@@ -3,8 +3,20 @@ use std::env;
 use std::fs;
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
+use std::string::ToString;
+use super::models::LangConfig;
 
-use crate::config::models::LangConfig;
+pub static HOST: Lazy<String> = Lazy::new(||
+    env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string())
+);
+pub static PORT: Lazy<String> = Lazy::new(||
+    env::var("PORT").unwrap_or_else(|_| "8000".to_string())
+);
+
+pub static WORKER_COUNT: Lazy<i8> = Lazy::new(||
+    env::var("WORKER_COUNT").map(|v| v.parse().unwrap_or(8))
+        .unwrap_or(4)
+);
 
 pub static LANG_CONFIG: Lazy<HashMap<String, LangConfig>> = Lazy::new(|| {
     let text = fs::read_to_string("config.json")
