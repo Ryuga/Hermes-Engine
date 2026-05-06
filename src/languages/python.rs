@@ -31,6 +31,7 @@ impl LanguageHandler for PythonHandler {
             PreparedProgram {
                 entry_file: work_dir.join(&req.entry_file),
                 entry_name: req.entry_file.clone(),
+                sources: None
             }
         )
     }

@@ -14,6 +14,7 @@ use crate::config::utils::get_lang_config;
 pub struct PreparedProgram {
     pub entry_file: PathBuf,
     pub entry_name: String,
+    pub sources: Option<Vec<String>>,
 }
 
 pub trait LanguageHandler {

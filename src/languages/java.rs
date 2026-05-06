@@ -83,6 +83,7 @@ impl LanguageHandler for JavaHandler {
             PreparedProgram {
                 entry_file: work_dir.join(format!("{}.java", entry_name)),
                 entry_name,
+                sources: None
             }
         )
     }
