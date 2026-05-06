@@ -21,7 +21,8 @@ impl CppHandler {
 
     fn check_for_security_violations(code: &str) -> Result<(), String> {
         if EXTERNAL_REF_RE.is_match(code) {
-            return Err("Compilation Error: Absolute paths or path traversal in includes is forbidden.".to_string());
+            return Err("Preparation Error: \
+            Absolute paths or path traversal in includes is forbidden.".to_string());
         }
 
         Ok(())

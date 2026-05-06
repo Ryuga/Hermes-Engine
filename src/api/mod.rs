@@ -29,7 +29,9 @@ fn create_cors_layer() -> CorsLayer {
 pub fn create_router(state: Arc<AppState>) -> Router {
     Router::new()
         .route("/", get(handlers::root_handler))
-        .route("/execute/", post(handlers::execution_handler)
+        .route("/execute/", post(handlers::single_execution)
+            .options(|| async { StatusCode::OK }))
+        .route("/v2/execute/", post(handlers::multi_execution)
             .options(|| async { StatusCode::OK }))
         .layer(create_cors_layer())
         .with_state(state)
