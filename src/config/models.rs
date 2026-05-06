@@ -153,14 +153,31 @@ pub struct ReqMulti {
 
 impl Validate for ReqMulti {
     fn validate(&self) -> Result<(), String> {
+
+        let mut entry_file_found = false;
+
+        if self.files.is_empty() {
+            return Err("Preparation Error: No files provided".into());
+        }
+
         for file in &self.files {
             if file.name.contains("..") || file.name.starts_with('/') {
-                return Err(format!("Security Violation: Invalid path in filename '{}'", file.name));
+                return Err(
+                    format!("Security Violation: Invalid path in filename '{}'", file.name)
+                );
+            }
+            if file.name == self.entry_file {
+                entry_file_found = true;
             }
         }
 
-        if self.entry_file.contains("..") {
-            return Err("Security Violation: Invalid entry_file path".into());
+        if !entry_file_found {
+            return Err(
+                format!(
+                    "Preparation Error: Entry file '{}' not found in file list",
+                    self.entry_file
+                )
+            );
         }
 
         Ok(())
