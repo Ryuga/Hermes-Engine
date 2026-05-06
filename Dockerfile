@@ -42,7 +42,7 @@ Signed-By: /etc/apt/keyrings/isolate.asc" > /etc/apt/sources.list.d/isolate.sour
 RUN apt-get update && apt-get install -y isolate && rm -rf /var/lib/apt/lists/*
 
 # Configuration & Permissions
-COPY config/isolate.conf /etc/isolate
+COPY assets/isolate.conf /etc/isolate
 RUN chown root:root /usr/bin/isolate && chmod 4755 /usr/bin/isolate
 
 # Runtime Environment Setup

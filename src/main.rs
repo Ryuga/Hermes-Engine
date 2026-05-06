@@ -1,17 +1,13 @@
-mod exe;
-mod runner;
-mod loader;
-mod models;
 mod languages;
-mod workers;
 mod api;
+mod config;
+mod core;
 
 use std::env;
 use dotenvy::dotenv;
 use tokio::net::TcpListener;
-
-use crate::models::AppState;
-use crate::workers::{BoxManager};
+use config::models::AppState;
+use core::workers::BoxManager;
 use tracing_subscriber::{fmt, EnvFilter};
 use tracing::info;
 use std::sync::Arc;

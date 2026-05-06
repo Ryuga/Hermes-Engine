@@ -3,7 +3,7 @@ use std::path::Path;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use crate::languages::{LanguageHandler, PreparedProgram};
-use crate::models::LangConfig;
+use crate::config::models::LangConfig;
 
 pub struct JavaHandler {
     config: &'static LangConfig,
