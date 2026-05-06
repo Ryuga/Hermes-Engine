@@ -1,6 +1,6 @@
 use tracing::debug;
 use crate::languages::get_handler;
-use crate::config::loader::get_lang_config;
+use crate::config::utils::get_lang_config;
 use crate::config::models::{Req, Resp};
 use crate::core::runner::safe_execute;
 use crate::core::workers::IsolateBox;

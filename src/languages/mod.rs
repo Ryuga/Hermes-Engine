@@ -8,7 +8,7 @@ use crate::languages::cpp::CppHandler;
 use crate::languages::java::JavaHandler;
 use crate::languages::javascript::JavascriptHandler;
 use crate::languages::python::PythonHandler;
-use crate::config::loader::get_lang_config;
+use crate::config::utils::get_lang_config;
 
 pub struct PreparedProgram {
     pub entry_file: PathBuf,

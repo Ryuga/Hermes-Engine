@@ -5,7 +5,7 @@ use axum::routing::{get, post};
 use http::{HeaderValue, Method, StatusCode};
 use http::header::CONTENT_TYPE;
 use tower_http::cors::CorsLayer;
-use crate::config::models::AppState;
+use crate::state::AppState;
 pub mod handlers;
 
 

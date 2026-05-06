@@ -2,11 +2,12 @@ mod languages;
 mod api;
 mod config;
 mod core;
+mod state;
 
 use std::env;
 use dotenvy::dotenv;
 use tokio::net::TcpListener;
-use config::models::AppState;
+use state::AppState;
 use core::workers::BoxManager;
 use tracing_subscriber::{fmt, EnvFilter};
 use tracing::info;
