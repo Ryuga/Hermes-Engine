@@ -1,9 +1,10 @@
-
-use std::env;
 use std::fs;
-use once_cell::sync::Lazy;
-use std::collections::HashMap;
+use std::env;
 use std::string::ToString;
+use std::collections::HashMap;
+
+use once_cell::sync::Lazy;
+
 use super::models::LangConfig;
 
 pub static HOST: Lazy<String> = Lazy::new(||

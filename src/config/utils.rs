@@ -1,5 +1,6 @@
 use serde::{Deserializer, Deserialize, de::Error};
-use crate::config::models::LangConfig;
+
+use super::models::LangConfig;
 use super::constants::LANG_CONFIG;
 
 

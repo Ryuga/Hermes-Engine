@@ -1,9 +1,11 @@
 use std::process::Command;
-use tokio::time::Instant;
+
 use tracing::debug;
-use crate::config::constants::IS_DEBUG;
-use crate::config::models::LangConfig;
+use tokio::time::Instant;
+
 use crate::core::workers::IsolateBox;
+use crate::config::models::LangConfig;
+use crate::config::constants::IS_DEBUG;
 
 pub fn safe_execute(isolate_box: &IsolateBox,
                     config: &LangConfig,
@@ -12,6 +14,7 @@ pub fn safe_execute(isolate_box: &IsolateBox,
     let start = Instant::now();
 
     let mut cmd = Command::new("isolate");
+
     // Box config
     cmd.arg("--box-id").arg(&isolate_box.id.to_string());
     cmd.arg("--cg");

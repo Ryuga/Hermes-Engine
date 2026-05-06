@@ -1,12 +1,16 @@
+pub mod handlers;
+
+
 use std::env;
 use std::sync::Arc;
+
 use axum::Router;
 use axum::routing::{get, post};
-use http::{HeaderValue, Method, StatusCode};
 use http::header::CONTENT_TYPE;
 use tower_http::cors::CorsLayer;
+use http::{HeaderValue, Method, StatusCode};
+
 use crate::state::AppState;
-pub mod handlers;
 
 
 fn create_cors_layer() -> CorsLayer {

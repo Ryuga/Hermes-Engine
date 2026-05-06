@@ -1,14 +1,17 @@
-mod languages;
 mod api;
-mod config;
 mod core;
 mod state;
+mod config;
+mod languages;
 
-use tokio::net::TcpListener;
-use state::AppState;
-use tracing::info;
 use std::sync::Arc;
+
+use tracing::info;
+use tokio::net::TcpListener;
+
+use state::AppState;
 use config::constants;
+
 
 #[tokio::main(flavor="multi_thread")]
 async fn main() {
@@ -24,5 +27,3 @@ async fn main() {
 
     axum::serve(listener, app).await.unwrap();
 }
-
-
