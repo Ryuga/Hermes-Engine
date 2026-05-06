@@ -138,7 +138,7 @@ pub struct Resp {
     pub time_ms: u128,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct File{
     pub name: String,
     pub content: String,

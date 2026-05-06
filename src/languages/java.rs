@@ -25,7 +25,7 @@ impl JavaHandler {
 
     fn check_for_external_imports_and_packages(code: &str) -> Result<(), String> {
         if code.contains("package ") {
-            return Err("Compilation Error: 'package' declarations are not allowed.".to_string());
+            return Err("Preparation Error: 'package' declarations are not allowed.".to_string());
         }
 
         for matches in IMPORT_RE.captures_iter(code) {
@@ -35,7 +35,7 @@ impl JavaHandler {
                 || import.starts_with("jdk."))
             {
                 return Err(
-                    format!("Compilation Error: external import '{}' is not allowed.", import)
+                    format!("Preparation Error: external import '{}' is not allowed.", import)
                 );
             }
         }
@@ -77,12 +77,13 @@ impl LanguageHandler for JavaHandler {
             fs::write(&file_path, &file.content).map_err(|e| e.to_string())?;
         }
         let entry_name = main_class_name
-            .ok_or("Compilation Error: Entry file not found or invalid.")?;
+            .ok_or("Preparation Error: Entry file not found or invalid.")?;
 
         Ok(
             PreparedProgram {
                 entry_file: work_dir.join(format!("{}.java", entry_name)),
                 entry_name,
+                sources: None
             }
         )
     }

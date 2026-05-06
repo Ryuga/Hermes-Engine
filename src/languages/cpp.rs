@@ -21,7 +21,8 @@ impl CppHandler {
 
     fn check_for_security_violations(code: &str) -> Result<(), String> {
         if EXTERNAL_REF_RE.is_match(code) {
-            return Err("Compilation Error: Absolute paths or path traversal in includes is forbidden.".to_string());
+            return Err("Preparation Error: \
+            Absolute paths or path traversal in includes is forbidden.".to_string());
         }
 
         Ok(())
@@ -31,7 +32,7 @@ impl CppHandler {
 impl LanguageHandler for CppHandler {
     fn prepare(&self, work_dir: &Path, req: &ReqMulti) -> Result<PreparedProgram, String> {
 
-        let mut entry_file_path = None;
+        let mut sources = Vec::new();
 
         for file in &req.files {
             Self::check_for_security_violations(&file.content)?;
@@ -44,16 +45,19 @@ impl LanguageHandler for CppHandler {
 
             fs::write(&item, &file.content).map_err(|e| e.to_string())?;
 
-            if file.name == req.entry_file {
-                entry_file_path = Some(item);
+            if file.name.ends_with(".cpp") || file.name.ends_with(".cc") {
+                sources.push(file.name.clone());
             }
         }
 
-        let entry_file = entry_file_path.ok_or("Entry file not found")?;
+        if sources.is_empty() {
+            return Err("Compilation Error: No C++ source files found.".to_string());
+        }
 
         Ok(PreparedProgram {
-            entry_file,
+            entry_file: work_dir.to_path_buf(),
             entry_name: "solution".to_string(),
+            sources: Some(sources),
         })
     }
 
@@ -61,9 +65,10 @@ impl LanguageHandler for CppHandler {
         let mut cmd = vec![self.config.compiler_path.clone()];
         cmd.extend(self.config.compiler_args.clone());
 
-        let source_name = prepared.entry_file.file_name().unwrap().to_str().unwrap();
+        if let Some(ref sources) = prepared.sources {
+            cmd.extend(sources.iter().cloned());
+        }
 
-        cmd.push(source_name.to_string());
         cmd.push("-o".to_string());
         cmd.push(prepared.entry_name.clone());
 
