@@ -2,7 +2,7 @@ use serde::de::Error;
 use serde::{Deserialize, Deserializer, Serialize};
 
 use super::utils::string_or_int;
-
+use crate::api::utils::Validate;
 
 fn default_vector() -> Vec<String> { vec![] }
 fn default_compile() -> bool { false }
@@ -136,4 +136,33 @@ pub struct Resp {
     pub output: String,
     pub std_log: String,
     pub time_ms: u128,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct File{
+    pub name: String,
+    pub content: String,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct ReqMulti {
+    pub language: String,
+    pub files: Vec<File>,
+    pub entry_file: String,
+}
+
+impl Validate for ReqMulti {
+    fn validate(&self) -> Result<(), String> {
+        for file in &self.files {
+            if file.name.contains("..") || file.name.starts_with('/') {
+                return Err(format!("Security Violation: Invalid path in filename '{}'", file.name));
+            }
+        }
+
+        if self.entry_file.contains("..") {
+            return Err("Security Violation: Invalid entry_file path".into());
+        }
+
+        Ok(())
+    }
 }

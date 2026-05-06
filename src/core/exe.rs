@@ -1,13 +1,13 @@
 use tracing::debug;
-
+use crate::api::utils::ValidatedJson;
 use crate::languages::get_handler;
 use crate::core::runner::safe_execute;
 use crate::core::workers::IsolateBox;
-use crate::config::models::{Req, Resp};
+use crate::config::models::{ReqMulti, Resp};
 use crate::config::utils::get_lang_config;
 
 
-pub fn execute_code(isolate_box: &IsolateBox, req: Req, passed_token: Option<String>) -> Result<Resp, String>{
+pub fn execute_code(isolate_box: &IsolateBox, req: ReqMulti, passed_token: Option<String>) -> Result<Resp, String>{
     let lang_config = get_lang_config(&req.language);
 
     if lang_config.authenticate {
@@ -33,7 +33,7 @@ pub fn execute_code(isolate_box: &IsolateBox, req: Req, passed_token: Option<Str
     let work_dir = &isolate_box.path;
 
     debug!("Preparing programing for execution");
-    let program = match handler.prepare(work_dir, &req.code) {
+    let program = match handler.prepare(work_dir, &req) {
         Ok(p) => p,
         Err(e) => {
             return Ok(Resp{

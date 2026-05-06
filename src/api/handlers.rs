@@ -4,9 +4,10 @@ use axum::Json;
 use tracing::{debug, error};
 use http::StatusCode;
 use axum::extract::State;
+use crate::api::utils::ValidatedJson;
 use crate::state::{AppState};
 use crate::core::exe::execute_code;
-use crate::config::models::{Req, Resp};
+use crate::config::models::{ReqMulti, Resp};
 
 
 pub async fn root_handler() -> &'static str {
@@ -16,7 +17,7 @@ pub async fn root_handler() -> &'static str {
 pub async fn execution_handler(
     State(state): State<Arc<AppState>>,
     headers: http::HeaderMap,
-    Json(req): Json<Req>
+    ValidatedJson(req): ValidatedJson<ReqMulti>
 ) -> Result<Json<Resp>, StatusCode> {
     debug!("Received request: {:?}", req);
 

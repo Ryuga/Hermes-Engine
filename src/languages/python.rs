@@ -2,7 +2,7 @@ use std::fs;
 use std::path::Path;
 use tracing::warn;
 use crate::languages::{LanguageHandler, PreparedProgram};
-use crate::config::models::LangConfig;
+use crate::config::models::{LangConfig, ReqMulti};
 
 pub struct PythonHandler {
     config: &'static LangConfig,
@@ -15,13 +15,22 @@ impl PythonHandler {
 }
 
 impl LanguageHandler for PythonHandler {
-    fn prepare(&self, work_dir: &Path, code: &str) -> Result<PreparedProgram, String> {
-        let file = work_dir.join(&self.config.source);
-        fs::write(&file, code).map_err(|e| e.to_string())?;
+    fn prepare(&self, work_dir: &Path, req: &ReqMulti) -> Result<PreparedProgram, String> {
+
+        for file in &req.files {
+            let item = work_dir.join(&file.name);
+
+            if let Some(parent) = item.parent() {
+                fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+            }
+
+            fs::write(item, &file.content).map_err(|e| e.to_string())?;
+        }
+
         Ok(
             PreparedProgram {
-                entry_file: file,
-                entry_name: self.config.source.clone(),
+                entry_file: work_dir.join(&req.entry_file),
+                entry_name: req.entry_file.clone(),
             }
         )
     }

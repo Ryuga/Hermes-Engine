@@ -4,6 +4,7 @@ mod java;
 mod cpp;
 
 use std::path::{Path, PathBuf};
+use crate::config::models::{ReqMulti};
 use crate::languages::cpp::CppHandler;
 use crate::languages::java::JavaHandler;
 use crate::languages::javascript::JavascriptHandler;
@@ -16,7 +17,7 @@ pub struct PreparedProgram {
 }
 
 pub trait LanguageHandler {
-    fn prepare(&self, work_dir: &Path, code: &str) -> Result<PreparedProgram, String>;
+    fn prepare(&self, work_dir: &Path, req: &ReqMulti) -> Result<PreparedProgram, String>;
     fn compile_cmd(&self, prepared: &PreparedProgram) -> Vec<String>;
     fn run_cmd(&self, prepared: &PreparedProgram) -> Vec<String>;
 }

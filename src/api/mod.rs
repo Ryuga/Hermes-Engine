@@ -1,5 +1,5 @@
 pub mod handlers;
-
+pub mod utils;
 
 use std::env;
 use std::sync::Arc;

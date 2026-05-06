@@ -3,7 +3,7 @@ use std::path::Path;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use crate::languages::{LanguageHandler, PreparedProgram};
-use crate::config::models::LangConfig;
+use crate::config::models::{LangConfig, ReqMulti};
 
 pub struct JavaHandler {
     config: &'static LangConfig,
@@ -51,19 +51,38 @@ impl JavaHandler {
 }
 
 impl LanguageHandler for JavaHandler {
-    fn prepare(&self, work_dir: &Path, code: &str) -> Result<PreparedProgram, String> {
+    fn prepare(&self, work_dir: &Path, req: &ReqMulti) -> Result<PreparedProgram, String> {
 
-        Self::check_for_external_imports_and_packages(code)?;
+        let mut main_class_name: Option<String> = None;
 
-        let class_name = Self::extract_main_class_name(&code)?;
+        for file in &req.files {
+            Self::check_for_external_imports_and_packages(&file.content)?;
 
-        let file_path = work_dir.join(format!("{}.java", class_name));
-        fs::write(&file_path, code).map_err(|e| e.to_string())?;
+            let is_entry = file.name == req.entry_file;
+
+            let final_name = if is_entry {
+                let name = Self::extract_main_class_name(&file.content)?;
+                main_class_name = Some(name.clone());
+                format!("{}.java", name)
+            } else {
+                file.name.clone()
+            };
+
+            let file_path = work_dir.join(final_name);
+
+            if let Some(parent) = file_path.parent() {
+                fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+            }
+
+            fs::write(&file_path, &file.content).map_err(|e| e.to_string())?;
+        }
+        let entry_name = main_class_name
+            .ok_or("Compilation Error: Entry file not found or invalid.")?;
 
         Ok(
             PreparedProgram {
-                entry_file: file_path,
-                entry_name: class_name,
+                entry_file: work_dir.join(format!("{}.java", entry_name)),
+                entry_name,
             }
         )
     }

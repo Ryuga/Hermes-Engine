@@ -1,8 +1,14 @@
 use std::fs;
 use std::path::Path;
+use once_cell::sync::Lazy;
 use regex::Regex;
 use crate::languages::{LanguageHandler, PreparedProgram};
-use crate::config::models::LangConfig;
+use crate::config::models::{LangConfig, ReqMulti};
+
+
+static EXTERNAL_REF_RE: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r#"(?m)#include\s*[<"]\s*(/|\.\.).*[>"]"#).unwrap()
+});
 
 pub struct CppHandler {
     config: &'static LangConfig,
@@ -13,20 +19,9 @@ impl CppHandler {
         Self { config }
     }
 
-    fn check_for_external_includes(code: &str) -> Result<(), String> {
-        let local_include_re = Regex::new(r#"(?m)^\s*#\s*include\s*"([^"]+)""#).unwrap();
-
-        if let Some(caps) = local_include_re.captures(code) {
-            return Err(format!(
-                "Compilation Error: Local include '\"{}\"' is not allowed. \
-                Please use only standard headers.",
-                &caps[1]
-            ));
-        }
-
-        let path_traversal_re = Regex::new(r#"(?m)^\s*#\s*include\s*<.*(\.\.|/).*>"#).unwrap();
-        if path_traversal_re.is_match(code) {
-            return Err("Compilation Error: Path traversal in includes is forbidden.".to_string());
+    fn check_for_security_violations(code: &str) -> Result<(), String> {
+        if EXTERNAL_REF_RE.is_match(code) {
+            return Err("Compilation Error: Absolute paths or path traversal in includes is forbidden.".to_string());
         }
 
         Ok(())
@@ -34,21 +29,31 @@ impl CppHandler {
 }
 
 impl LanguageHandler for CppHandler {
-    fn prepare(&self, work_dir: &Path, code: &str) -> Result<PreparedProgram, String> {
-        Self::check_for_external_includes(code)?;
+    fn prepare(&self, work_dir: &Path, req: &ReqMulti) -> Result<PreparedProgram, String> {
 
-        let file_path = work_dir.join(&self.config.source);
-        fs::write(&file_path, code).map_err(|e| e.to_string())?;
+        let mut entry_file_path = None;
 
-        let bin_name = Path::new(&self.config.source)
-            .file_stem()
-            .and_then(|s| s.to_str())
-            .unwrap_or("solution")
-            .to_string();
+        for file in &req.files {
+            Self::check_for_security_violations(&file.content)?;
+
+            let item = work_dir.join(&file.name);
+
+            if let Some(parent) = item.parent() {
+                fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+            }
+
+            fs::write(&item, &file.content).map_err(|e| e.to_string())?;
+
+            if file.name == req.entry_file {
+                entry_file_path = Some(item);
+            }
+        }
+
+        let entry_file = entry_file_path.ok_or("Entry file not found")?;
 
         Ok(PreparedProgram {
-            entry_file: file_path,
-            entry_name: bin_name,
+            entry_file,
+            entry_name: "solution".to_string(),
         })
     }
 
