@@ -1,20 +1,9 @@
-use std::env;
 use std::process::Command;
-use once_cell::sync::Lazy;
 use tokio::time::Instant;
 use tracing::debug;
+use crate::config::constants::IS_DEBUG;
 use crate::config::models::LangConfig;
 use crate::core::workers::IsolateBox;
-
-static DEBUG: Lazy<bool> = Lazy::new(|| {
-    match env::var("RUST_LOG") {
-        Ok(val) => {
-            let v = val.to_lowercase();
-            v == "debug" || v == "full"
-        }
-        Err(_) => false,
-    }
-});
 
 pub fn safe_execute(isolate_box: &IsolateBox,
                     config: &LangConfig,
@@ -42,7 +31,7 @@ pub fn safe_execute(isolate_box: &IsolateBox,
     cmd.arg(format!("--processes={}", config.max_processes));
 
     // Environment
-    if !*DEBUG {
+    if !*IS_DEBUG {
         cmd.arg("--silent");
     }
     cmd.arg("--env=PATH=/usr/bin:/bin");

@@ -1,20 +1,7 @@
-use serde::{Deserialize, Deserializer, Serialize};
+
 use serde::de::Error;
-use std::sync::Arc;
-use crate::core::workers::BoxManager;
-
-fn string_or_int<'de, D>(deserializer: D) -> Result<String, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    use serde_json::Value;
-
-    match Value::deserialize(deserializer)? {
-        Value::String(s) => Ok(s),
-        Value::Number(n) => Ok(n.to_string()),
-        _ => Err(D::Error::custom("expected string or integer")),
-    }
-}
+use super::utils::string_or_int;
+use serde::{Deserialize, Deserializer, Serialize};
 
 fn default_vector() -> Vec<String> { vec![] }
 fn default_compile() -> bool { false }
@@ -148,14 +135,4 @@ pub struct Resp {
     pub output: String,
     pub std_log: String,
     pub time_ms: u128,
-}
-
-pub struct AppState {
-    pub box_manager: Arc<BoxManager>,
-}
-
-impl AppState {
-    pub fn new(box_manager: Arc<BoxManager>) -> Self {
-        AppState { box_manager }
-    }
 }
