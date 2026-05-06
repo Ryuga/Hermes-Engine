@@ -1,6 +1,7 @@
-# Hermes Code Execution Engine v2
+# Hermes Code Execution Engine
 
-Hermes is a high-performance, sandboxed code execution engine written in Rust. Fully upgraded with modern `cgroups v2` support, it runs untrusted and potentially hostile code inside strictly isolated environments ensuring safety, predictability, and high throughput.
+Hermes is a high-performance, sandboxed code execution engine written in Rust. <br/>
+Fully upgraded with `cgroups v2` support, it runs untrusted and potentially hostile code inside strictly isolated environments ensuring safety, predictability, and high throughput.
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Ryuga/Hermes)
 [![Status](https://img.shields.io/website?url=https%3A%2F%2Fapi.tortoisecommunity.org&up_message=UP&down_message=DOWN&label=API)](https://execute.tortoisecommunity.org)
@@ -13,7 +14,7 @@ Designed for judge platforms, coding sandboxes, and auto-eval services, Hermes p
 
 ---
 
-## 🐳 Docker Deployment (Recommended)
+## Docker Deployment (Recommended)
 
 The easiest and safest way to run Hermes Engine is via Docker. 
 
@@ -30,7 +31,6 @@ cd Hermes
 
 Create a `.env` file in the root directory:
 ```shell
-DEBUG=true  # turns on log output through std_log
 HOST=0.0.0.0
 PORT=8000
 ALLOWED_ORIGIN=https://your_frontend_domain_to_allow_cors.com
@@ -61,7 +61,7 @@ Validate by running `curl http://127.0.0.1:8000`, which should return `UP!`.
 
 ---
 
-## 💻 Bare-Metal Deployment
+## Bare-Metal Deployment
 
 If you prefer not to use Docker, you can run Hermes directly on a Linux server.
 
@@ -90,7 +90,6 @@ Binary will be output to: `target/release/Hermes`
 
 ### 2. Configure `.env`
 ```shell
-DEBUG=false
 HOST=127.0.0.1
 PORT=8000
 ALLOWED_ORIGIN=https://your_frontend_domain_for_cors.com

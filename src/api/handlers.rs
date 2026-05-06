@@ -1,0 +1,37 @@
+use std::sync::Arc;
+use axum::extract::State;
+use axum::Json;
+use http::StatusCode;
+use tracing::debug;
+use crate::exe::execute_code;
+use crate::models::{AppState, Req, Resp};
+
+
+pub async fn root_handler() -> &'static str {
+    "UP!"
+}
+
+pub async fn execution_handler(
+    State(state): State<Arc<AppState>>,
+    headers: axum::http::HeaderMap,
+    Json(req): Json<Req>
+) -> Result<Json<Resp>, StatusCode> {
+    debug!("Received request: {:?}", req);
+
+    let manager = state.box_manager.clone();
+
+    let auth_token = headers
+        .get(axum::http::header::AUTHORIZATION)
+        .and_then(|h| h.to_str().ok())
+        .map(|s| s.to_string());
+
+    let result = tokio::task::spawn_blocking(move || {
+        let isolate_box = manager.acquire();
+        let run_result = execute_code(&isolate_box, req, auth_token);
+        manager.release(isolate_box);
+        run_result
+    }).await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    Ok(Json(result))
+}
