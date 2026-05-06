@@ -9,14 +9,14 @@ Fully upgraded with `cgroups v2` support, it runs untrusted and potentially host
 
 ---
 
-## About 
+## About
 Designed for judge platforms, coding sandboxes, and auto-eval services, Hermes provides on-demand execution of arbitrary code through a simple REST API. Version 2 introduces native Docker compatibility, eliminating host kernel configuration headaches by utilizing a custom split-cgroup architecture to strictly enforce resource limits.
 
 ---
 
 ## Docker Deployment (Recommended)
 
-The easiest and safest way to run Hermes Engine is via Docker. 
+The easiest and safest way to run Hermes Engine is via Docker.
 
 The provided `Dockerfile` handles all system dependencies, compilers, and the Isolate sandbox engine.
 
@@ -55,7 +55,7 @@ docker run -d \
   hermes-engine
 ```
 
-The application will be live at `http://127.0.0.1:8000`. 
+The application will be live at `http://127.0.0.1:8000`.
 
 Validate by running `curl http://127.0.0.1:8000`, which should return `UP!`.
 
@@ -68,11 +68,11 @@ If you prefer not to use Docker, you can run Hermes directly on a Linux server.
 > ### ⚠️ **Security Warning**
 >
 > While `isolate` strictly enforces resource limits and prevents file system modifications, it requires read-only bind mounts to system directories (`/lib`, `/usr`, `/etc`) to provide the necessary runtimes for languages like Python and Java.
-> Running Hermes directly on a bare-metal host means untrusted code may be able to read sensitive host system details. 
-> 
+> Running Hermes directly on a bare-metal host means untrusted code may be able to read sensitive host system details.
+>
 >**For production, deploying via Docker is strongly recommended**
 >
-> 
+>
 ### Requirements
 * Linux server with `cgroups v2` enabled
 * Rust toolchain installed
@@ -208,13 +208,63 @@ Content-Type: application/json
 * `output` → program stdout
 * `std_log` → error output / logs (if `DEBUG=true` or compilation fails)
 
-### Example
+
+### Quick test
 ```bash
 curl -X POST http://127.0.0.1:8000/execute/ \
   -H "Content-Type: application/json" \
   -d '{"language":"python","code":"print(1+1)"}'
 ```
 
+## Example
+
+### Single-File Execution
+To execute single file, send a `POST` request to the `/execute/` endpoint.
+
+**Endpoint:** `POST /execute/`
+
+**Payload Example:**
+```json
+{
+  "language": "python",
+  "code":"print(1+1)"
+}
+```
+
+### Multi-File Execution
+
+To execute multiple files, send a `POST` request to the `/v2/execute/` endpoint. You must define an `entry_file` to specify which file the interpreter should run first.
+
+**Endpoint:** `POST /v2/execute/`
+
+**Payload Example:**
+
+```json
+{
+  "language": "python",
+  "files": [
+    {
+      "name": "main.py",
+      "content": "import test\nprint('Running main.py')"
+    },
+    {
+      "name": "test.py",
+      "content": "print('Imported test.py')"
+    }
+  ],
+  "entry_file": "main.py"
+}
+```
+
+**Response:**
+
+```json
+{
+  "stdout": "Imported test.py\nRunning main.py",
+  "stderr": "",
+  "exit_code": 0
+}
+```
 ---
 
 ## Used By
