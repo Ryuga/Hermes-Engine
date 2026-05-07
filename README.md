@@ -1,7 +1,8 @@
 # Hermes Code Execution Engine
 
 Hermes is a high-performance, sandboxed code execution engine written in Rust. <br/>
-Fully upgraded with `cgroups v2` support, it runs untrusted and potentially hostile code inside strictly isolated environments ensuring safety, predictability, and high throughput.
+It runs untrusted and potentially hostile code inside strictly isolated environments ensuring safety, predictability, and high throughput.<br/>
+Fully upgraded with `cgroups v2` support for enforcing better resource limits. 
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Ryuga/Hermes)
 [![Status](https://img.shields.io/website?url=https%3A%2F%2Fapi.tortoisecommunity.org&up_message=UP&down_message=DOWN&label=API)](https://execute.tortoisecommunity.org)
@@ -82,7 +83,7 @@ If you prefer not to use Docker, you can run Hermes directly on a Linux server.
 
 ### 1. Build Application
 ```bash
-git clone [https://github.com/Ryuga/Hermes.git](https://github.com/Ryuga/Hermes.git)
+git clone https://github.com/Ryuga/Hermes.git
 cd Hermes
 cargo build --release
 ```
