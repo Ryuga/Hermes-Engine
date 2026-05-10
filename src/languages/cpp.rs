@@ -10,6 +10,10 @@ static EXTERNAL_REF_RE: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r#"(?m)#include\s*[<"]\s*(/|\.\.).*[>"]"#).unwrap()
 });
 
+static MAIN_METHOD_RE: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r"(?m)^int\s+main\s*\([^)]*\)\s*\{").unwrap()
+});
+
 pub struct CppHandler {
     config: &'static LangConfig,
 }
@@ -27,6 +31,13 @@ impl CppHandler {
 
         Ok(())
     }
+
+    fn check_for_main_method(code: &str) -> Result<(), String> {
+        if !MAIN_METHOD_RE.is_match(code) {
+            return Err("Compilation Error: C++ programs must declare a main method.".to_string());
+        }
+        Ok(())
+    }
 }
 
 impl LanguageHandler for CppHandler {
@@ -36,6 +47,10 @@ impl LanguageHandler for CppHandler {
 
         for file in &req.files {
             Self::check_for_security_violations(&file.content)?;
+
+            if file.name == req.entry_file {
+                Self::check_for_main_method(&file.content)?;
+            }
 
             let item = work_dir.join(&file.name);
 
@@ -76,10 +91,6 @@ impl LanguageHandler for CppHandler {
     }
 
     fn run_cmd(&self, prepared: &PreparedProgram) -> Vec<String> {
-        let mut cmd = Vec::new();
-
-        cmd.push(format!("./{}", prepared.entry_name));
-
-        cmd
+        vec![format!("./{}", prepared.entry_name)]
     }
 }

@@ -34,7 +34,7 @@ impl LanguageHandler for JavascriptHandler {
         )
     }
     fn compile_cmd(&self, _: &PreparedProgram) -> Vec<String> {
-        warn!("No compilation required for javascript");
+        warn!("No compilation required for Javascript");
         vec![]
     }
 

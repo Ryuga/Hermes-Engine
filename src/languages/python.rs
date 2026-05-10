@@ -36,7 +36,7 @@ impl LanguageHandler for PythonHandler {
         )
     }
     fn compile_cmd(&self, _: &PreparedProgram) -> Vec<String> {
-        warn!("No compilation required for python");
+        warn!("No compilation required for Python");
         vec![]
     }
 
