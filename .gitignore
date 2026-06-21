@@ -2,3 +2,5 @@
 .idea
 .env
 .DS_Store
+certs/
+inventory.ini

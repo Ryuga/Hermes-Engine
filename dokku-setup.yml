@@ -1,0 +1,230 @@
+---
+- name: Install, configure Dokku and setup hermes engine
+  hosts: server1
+  become: yes
+  become_method: su
+  become_user: root
+  vars_prompt:
+    - name: APP_NAME
+      prompt: "Enter your app name"
+      private: no
+      default: "hermes-engine"
+
+    - name: NETWORK_NAME
+      prompt: "Enter internal network name if you'd like to give other containers access"
+      private: no
+      default: "hermes-internal"
+
+    - name: CPU_LIMIT
+      prompt: "Enter CPU core limit"
+      private: no
+      default: "2"
+
+    - name: MEMORY_LIMIT
+      prompt: "Enter memory (GB) limit"
+      private: no
+      default: "4"
+
+    - name: ssl_cert_path
+      prompt: "Enter local path to SSL Certificate"
+      private: no
+      default: "certs/hermes.crt"
+
+    - name: ssl_key_path
+      prompt: "Enter local path to SSL Private Key"
+      private: no
+      default: "certs/hermes.key"
+
+    - name: ssh_email
+      prompt: "Enter email address for SSH key"
+      private: no
+
+    - name: HOST
+      prompt: "Enter HOST"
+      private: no
+      default: "0.0.0.0"
+
+    - name: PORT
+      prompt: "Enter PORT"
+      private: no
+      default: "8000"
+
+    - name: API_TOKEN
+      prompt: "Enter API_TOKEN (To be used for static-key authentication)"
+      private: yes
+      default: "hermesAPITokenUnsecure"
+
+    - name: ALLOWED_ORIGIN
+      prompt: "Enter domain you need CORS (format: https://yourdomain.com)"
+      private: no
+
+    - name: RUST_LOG
+      prompt: "Enter you preferred log settings (error, warn, info [default], debug, trace, full, off)"
+      private: no
+      default: info
+
+  tasks:
+    - name: Validate user inputs
+      ansible.builtin.assert:
+        that:
+          - HOST is match('^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$')
+          - PORT | int >= 1024 and PORT | int <= 65535
+          - ALLOWED_ORIGIN is match('^https?://[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}')
+          - RUST_LOG in ['error', 'warn', 'info', 'debug', 'trace', 'full', 'off']
+          - CPU_LIMIT is match('^[1-9][0-9]*$')
+          - MEMORY_LIMIT is match('^[1-9][0-9]*$')
+        fail_msg: >-
+          Validation failed! Please review your input rules:
+          - HOST must be a valid IPv4 address.
+          - PORT must be a number between 1024 and 65535.
+          - ALLOWED_ORIGIN must start with 'http://' or 'https://' and have a valid domain extension.
+          - RUST_LOG must be one of these values: error, warn, info, debug, trace, full, off.
+          - CPU_LIMIT must be a positive number
+          - MEMORY_LIMIT must be a positive number
+        success_msg: "All inputs are correctly formatted and ready for deployment."
+
+    - name: Verify local SSL files exist
+      delegate_to: localhost
+      become: no
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      register: ssl_files
+      loop:
+        - "{{ ssl_cert_path }}"
+        - "{{ ssl_key_path }}"
+
+    - name: Assert SSL files are present
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+        fail_msg: "SSL file not found. Please ensure your .crt and .key files exist at the specified paths."
+      loop: "{{ ssl_files.results }}"
+
+    - name: Update and upgrade apt packages
+      apt:
+        update_cache: yes
+        upgrade: yes
+
+    - name: Install required dependencies
+      apt:
+        name:
+          - wget
+          - curl
+          - apt-transport-https
+          - ca-certificates
+          - gnupg
+        state: present
+
+    - name: Download Dokku bootstrap script
+      get_url:
+        url: https://dokku.com/install/v0.38.19/bootstrap.sh
+        dest: /tmp/bootstrap.sh
+        mode: "0755"
+
+    - name: Install Dokku
+      command: bash /tmp/bootstrap.sh
+      environment:
+        DOKKU_TAG: v0.38.19
+        OS_RELEASE: noble
+      args:
+        creates: /usr/bin/dokku
+
+    - name: Create Dokku app {{APP_NAME}}
+      command: dokku apps:create {{APP_NAME}}
+      args:
+        creates: /home/dokku/{{APP_NAME}}
+
+    - name: Set environment variables in Dokku
+      command: dokku config:set {{APP_NAME}}
+        RUST_LOG="{{ RUST_LOG }}"
+        HOST="{{ HOST }}"
+        PORT="{{ PORT }}"
+        ALLOWED_ORIGIN="{{ ALLOWED_ORIGIN }}"
+        API_TOKEN="{{ API_TOKEN }}"
+
+    - name: Set runtime resource limits
+      command: "dokku resource:limit {{ APP_NAME }} --cpu {{CPU_LIMIT}} --memory {{MEMORY_LIMIT}}g --memory-swap {{MEMORY_LIMIT}}g"
+
+    - name: Create internal Docker network
+      command: dokku network:create {{ NETWORK_NAME }}
+      register: net_create
+      failed_when: net_create.rc != 0 and 'already exists' not in net_create.stderr
+
+    - name: Attach app to internal Docker network
+      command: dokku network:set {{ APP_NAME }} attach-post-create {{ NETWORK_NAME }}
+
+    - name: Configure Docker options for deploy phase
+      command: 'dokku docker-options:add {{ APP_NAME }} deploy "{{ item }}"'
+      loop:
+        - "--privileged"
+        - "--cgroupns=private"
+        - "--tmpfs /sys/fs/cgroup"
+
+    - name: Configure Docker options for run phase
+      command: 'dokku docker-options:add {{ APP_NAME }} run "{{ item }}"'
+      loop:
+        - "--privileged"
+        - "--cgroupns=private"
+        - "--tmpfs /sys/fs/cgroup"
+
+    - name: Configure HTTPS port mapping
+      command: "dokku ports:set {{ APP_NAME }} https:443:{{ PORT }}"
+
+    - name: Copy SSL certificate to server
+      copy:
+        src: "{{ ssl_cert_path }}"
+        dest: "/tmp/{{ APP_NAME }}.crt"
+        mode: '0644'
+        owner: dokku
+
+    - name: Copy SSL key to server
+      copy:
+        src: "{{ ssl_key_path }}"
+        dest: "/tmp/{{ APP_NAME }}.key"
+        mode: '0600'
+        owner: dokku
+
+    - name: Add SSL certificates to Dokku
+      command: "dokku certs:add {{ APP_NAME }} /tmp/{{ APP_NAME }}.crt /tmp/{{ APP_NAME }}.key"
+
+    - name: Clean up temporary SSL files on server
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "/tmp/{{ APP_NAME }}.crt"
+        - "/tmp/{{ APP_NAME }}.key"
+
+    - name: Generate SSH key on the server
+      command: ssh-keygen -t rsa -b 4096 -C "{{ ssh_email }}" -f "{{ ansible_env.HOME }}/id_rsa" -N ""
+      args:
+        creates: "{{ ansible_env.HOME }}/id_rsa"
+
+    - name: Add the public key to Dokku for github actions
+      command: "dokku ssh-keys:add github-actions {{ ansible_env.HOME }}/id_rsa.pub"
+
+    - name: Read private key from server
+      slurp:
+        src: "{{ ansible_env.HOME }}/id_rsa"
+      register: server_private_key
+
+    - name: Get app config
+      command: dokku config:show {{APP_NAME}}
+      register: app_config
+      changed_when: false
+
+    - name: Print app config
+      debug:
+        msg: "{{ app_config.stdout_lines }}"
+
+    - name: Save private key locally for easy copying
+      copy:
+        content: "{{ server_private_key.content | b64decode }}"
+        dest: "./github_actions_key.pem"
+      delegate_to: localhost
+      become: no
+
+    - name: Clear configs
+      set_fact:
+        app_config: ""
+        server_private_key: ""
