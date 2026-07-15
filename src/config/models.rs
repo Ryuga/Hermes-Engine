@@ -16,7 +16,7 @@ fn default_open_files() -> String { 64.to_string() }
 fn default_file_size_kb() -> String { 1024.to_string() }
 
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct LangConfig {
     pub source: String,
 

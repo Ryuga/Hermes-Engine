@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::Json;
-use tracing::{debug, error};
+use tracing::instrument;
 use http::StatusCode;
 use axum::extract::State;
 
@@ -12,15 +12,15 @@ use crate::config::models::{File, Req, ReqMulti, Resp};
 use crate::config::utils::get_lang_config;
 
 pub async fn root_handler() -> &'static str {
-    "UP!"
+    "ENGINE RUNNING!"
 }
 
+#[instrument(level = "debug", skip(state, headers))]
 pub async fn single_execution(
     State(state): State<Arc<AppState>>,
     headers: http::HeaderMap,
     Json(req): Json<Req>
 ) -> Result<Json<Resp>, StatusCode> {
-    debug!("Single Execution request: {:?}", req);
 
     let state_ref = Arc::clone(&state);
     let lang_config = get_lang_config(&req.language).map_err(|_| StatusCode::BAD_REQUEST)?;
@@ -44,13 +44,12 @@ pub async fn single_execution(
     let result = run_execution(state_ref, multi_req, auth_token).await?;
     Ok(Json(result))
 }
-
+#[instrument(level = "debug", skip(state, headers))]
 pub async fn multi_execution(
     State(state): State<Arc<AppState>>,
     headers: http::HeaderMap,
     ValidatedJson(req): ValidatedJson<ReqMulti>
 ) -> Result<Json<Resp>, StatusCode> {
-    debug!("Multi Execution request: {:?}", req);
 
     let state_ref = Arc::clone(&state);
 
@@ -64,6 +63,7 @@ pub async fn multi_execution(
 }
 
 
+#[instrument(level = "info", skip(state, auth_token), err(Debug))]
 async fn run_execution(state: Arc<AppState>,
     req: ReqMulti,
     auth_token: Option<String>
@@ -77,12 +77,6 @@ async fn run_execution(state: Arc<AppState>,
         manager.release(isolate_box);
         run_result
     }).await
-        .map_err(|e| {
-            error!("Task error: {}", e);
-            StatusCode::INTERNAL_SERVER_ERROR
-        })?
-        .map_err(|e| {
-            error!("Exec error: {}", e);
-            StatusCode::INTERNAL_SERVER_ERROR
-        })
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
 }

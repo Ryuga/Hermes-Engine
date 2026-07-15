@@ -1,11 +1,11 @@
-use tracing::debug;
+use tracing::instrument;
 use crate::languages::get_handler;
 use crate::core::runner::safe_execute;
 use crate::core::workers::IsolateBox;
 use crate::config::models::{ReqMulti, Resp};
 use crate::config::utils::get_lang_config;
 
-
+#[instrument(level = "debug", skip(passed_token))]
 pub fn execute_code(isolate_box: &IsolateBox, req: ReqMulti, passed_token: Option<String>) -> Result<Resp, String>{
     let lang_config = match get_lang_config(&req.language) {
         Ok(config) => config,
@@ -41,7 +41,6 @@ pub fn execute_code(isolate_box: &IsolateBox, req: ReqMulti, passed_token: Optio
 
     let work_dir = &isolate_box.path;
 
-    debug!("Preparing programing for execution");
     let program = match handler.prepare(work_dir, &req) {
         Ok(p) => p,
         Err(e) => {
@@ -55,7 +54,6 @@ pub fn execute_code(isolate_box: &IsolateBox, req: ReqMulti, passed_token: Optio
     };
 
     if lang_config.compile {
-        debug!("Compiling program");
         let compile_args = handler.compile_cmd(&program);
         let (out, log, code, _) = safe_execute(isolate_box, lang_config, &compile_args)?;
         if code != 0 {
@@ -68,7 +66,6 @@ pub fn execute_code(isolate_box: &IsolateBox, req: ReqMulti, passed_token: Optio
         }
     }
 
-    debug!("Finalizing execution command");
     let run_args = handler.run_cmd(&program);
 
     let (output, std_log, code, time_ms) =
