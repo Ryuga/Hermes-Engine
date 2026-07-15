@@ -69,7 +69,7 @@ impl BoxManager {
             tx.send(b).unwrap();
         }
 
-        info!("Workers loaded: {}", count);
+        info!("Workers in pool: {}", count);
 
         Self {
             box_pool: rx,

@@ -9,9 +9,11 @@ fn get_system_cpu_count() -> usize {
     if let Ok(content) = fs::read_to_string("/sys/fs/cgroup/cpu.max") {
         let parts: Vec<&str> = content.split_whitespace().collect();
         if parts.len() == 2 {
-            if let (Ok(max), Ok(period)) = (parts[0].parse::<f64>(), parts[1].parse::<f64>()) {
-                let limit = (max / period).ceil() as usize;
-                return limit.min(core_count);
+            if parts[0] != "max" {
+                if let (Ok(max), Ok(period)) = (parts[0].parse::<f64>(), parts[1].parse::<f64>()) {
+                    let limit = (max / period).ceil() as usize;
+                    return limit.max(1);
+                }
             }
         }
     }
