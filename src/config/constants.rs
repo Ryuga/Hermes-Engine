@@ -4,7 +4,7 @@ use std::string::ToString;
 use std::collections::HashMap;
 use http::HeaderValue;
 use once_cell::sync::Lazy;
-
+use crate::utils::misc::get_calculated_worker_count;
 use super::models::LangConfig;
 
 pub static HOST: Lazy<String> = Lazy::new(||
@@ -14,11 +14,11 @@ pub static PORT: Lazy<String> = Lazy::new(||
     env::var("PORT").unwrap_or_else(|_| "8000".to_string())
 );
 
-pub static WORKER_COUNT: Lazy<i8> = Lazy::new(||
+pub static WORKER_COUNT: Lazy<usize> = Lazy::new(||
     env::var("WORKER_COUNT")
         .ok()
         .and_then(|v| v.parse().ok())
-        .unwrap_or(4)
+        .unwrap_or_else(get_calculated_worker_count)
 );
 
 pub static ALLOWED_ORIGINS: Lazy<Vec<HeaderValue>> = Lazy::new(|| {

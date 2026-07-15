@@ -4,10 +4,11 @@ use std::path::PathBuf;
 use std::process::Command;
 
 use crossbeam_channel::{bounded, Receiver, Sender};
+use tracing::info;
 
 #[derive(Debug)]
 pub struct IsolateBox {
-    pub id: i8,
+    pub id: usize,
     pub path: PathBuf,
 }
 
@@ -17,7 +18,7 @@ pub struct BoxManager {
 }
 
 impl IsolateBox {
-    pub fn new(id: i8) -> IsolateBox {
+    pub fn new(id: usize) -> IsolateBox {
         Self {
             id,
             path: PathBuf::from(format!("/var/lib/isolate/{}/box", id)),
@@ -46,7 +47,7 @@ impl IsolateBox {
 
 
 impl BoxManager {
-    pub fn new(count: i8) -> Self {
+    pub fn new(count: usize) -> Self {
         let (tx, rx) = bounded(count as usize);
 
         for i in 0..count{
@@ -67,6 +68,8 @@ impl BoxManager {
             let b = IsolateBox::new(i);
             tx.send(b).unwrap();
         }
+
+        info!("Workers loaded: {}", count);
 
         Self {
             box_pool: rx,
