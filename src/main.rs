@@ -11,11 +11,12 @@ use tokio::net::TcpListener;
 
 use state::AppState;
 use config::constants;
-
+use colored::*;
 
 #[tokio::main(flavor="multi_thread")]
 async fn main() {
     config::bootstrap();
+    let banner = include_str!("../assets/hermes_banner.txt");
 
     let state = Arc::new(AppState::new(*constants::WORKER_COUNT));
     let app = api::create_router(state);
@@ -23,6 +24,7 @@ async fn main() {
     let addr = format!("{}:{}", *constants::HOST, *constants::PORT);
     let listener = TcpListener::bind(&addr).await.unwrap();
 
+    println!("{}", banner.bright_green());
     info!("Hermes Engine listening on {}", addr);
 
     axum::serve(listener, app).await.unwrap();
