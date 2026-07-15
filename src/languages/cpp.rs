@@ -2,6 +2,7 @@ use std::fs;
 use std::path::Path;
 use once_cell::sync::Lazy;
 use regex::Regex;
+use tracing::instrument;
 use crate::languages::{LanguageHandler, PreparedProgram};
 use crate::config::models::{LangConfig, ReqMulti};
 
@@ -41,6 +42,7 @@ impl CppHandler {
 }
 
 impl LanguageHandler for CppHandler {
+    #[instrument(level = "debug", skip(self))]
     fn prepare(&self, work_dir: &Path, req: &ReqMulti) -> Result<PreparedProgram, String> {
 
         let mut sources = Vec::new();

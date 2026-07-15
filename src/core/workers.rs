@@ -5,7 +5,7 @@ use std::process::Command;
 
 use crossbeam_channel::{bounded, Receiver, Sender};
 
-
+#[derive(Debug)]
 pub struct IsolateBox {
     pub id: i8,
     pub path: PathBuf,

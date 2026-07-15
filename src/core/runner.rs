@@ -1,12 +1,13 @@
 use std::process::Command;
 
-use tracing::debug;
+use tracing::instrument;
 use tokio::time::Instant;
 
 use crate::core::workers::IsolateBox;
 use crate::config::models::LangConfig;
 use crate::config::constants::IS_DEBUG;
 
+#[instrument(level = "debug")]
 pub fn safe_execute(isolate_box: &IsolateBox,
                     config: &LangConfig,
                     run_args: &[String]
@@ -49,8 +50,6 @@ pub fn safe_execute(isolate_box: &IsolateBox,
     cmd.arg("--");
 
     cmd.args(run_args);
-
-    debug!(?cmd, "Executing isolate command");
 
     let out = cmd.output().map_err(|e| e.to_string())?;
     let time_ms = start.elapsed().as_millis();

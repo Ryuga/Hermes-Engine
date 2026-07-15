@@ -18,12 +18,12 @@
     - name: CPU_LIMIT
       prompt: "Enter CPU core limit"
       private: no
-      default: "2"
+      default: "1.5"
 
     - name: MEMORY_LIMIT
       prompt: "Enter memory (GB) limit"
       private: no
-      default: "4"
+      default: "3"
 
     - name: ssl_cert_path
       prompt: "Enter local path to SSL Certificate"
@@ -71,8 +71,8 @@
           - PORT | int >= 1024 and PORT | int <= 65535
           - ALLOWED_ORIGIN is match('^https?://[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}')
           - RUST_LOG in ['error', 'warn', 'info', 'debug', 'trace', 'full', 'off']
-          - CPU_LIMIT is match('^[1-9][0-9]*$')
-          - MEMORY_LIMIT is match('^[1-9][0-9]*$')
+          - CPU_LIMIT is match('^[0-9]+(\.[0-9]+)?$')
+          - MEMORY_LIMIT is match('^[0-9]+(\.[0-9]+)?$')
         fail_msg: >-
           Validation failed! Please review your input rules:
           - HOST must be a valid IPv4 address.
