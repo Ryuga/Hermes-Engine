@@ -5,8 +5,8 @@ It runs untrusted and potentially hostile code inside strictly isolated environm
 Fully upgraded with `cgroups v2` support for enforcing better resource limits. 
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Ryuga/Hermes)
-[![Status](https://img.shields.io/website?url=https%3A%2F%2Fapi.tortoisecommunity.org&up_message=UP&down_message=DOWN&label=API)](https://execute.tortoisecommunity.org)
-[![Status](https://img.shields.io/website?url=https%3A%2F%2Fexecute.tortoisecommunity.org&up_message=UP&down_message=DOWN&label=WEBSITE)](https://execute.tortoisecommunity.org)
+[![Status](https://img.shields.io/website?url=https%3A%2F%2Fapi.tyxc.org&up_message=UP&down_message=DOWN&label=API)](https://execute.tyxc.org)
+[![Status](https://img.shields.io/website?url=https%3A%2F%2Fexecute.tyxc.org&up_message=UP&down_message=DOWN&label=WEBSITE)](https://execute.tyxc.org)
 
 ---
 
@@ -269,6 +269,6 @@ To execute multiple files, send a `POST` request to the `/v2/execute/` endpoint.
 ---
 
 ## Used By
-* [Runtime](https://runtime-bot.tortoisecommunity.org) - Discord bot for code execution.
-* [Tortoise Community](https://execute.tortoisecommunity.org) - Online Code Execution Tool.
-* [Tortoise-BOT](https://tortoise-bot.tortoisecommunity.org) - Discord code execution functionality.
+* [Runtime](https://runtime-bot.tyxc.org) - Discord bot for code execution.
+* [Tortoise Community](https://execute.tyxc.org) - Online Code Execution Tool.
+* [Tortoise-BOT](https://tortoise-bot.tyxc.org) - Discord code execution functionality.
