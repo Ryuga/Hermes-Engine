@@ -6,6 +6,8 @@ pub mod utils;
 use dotenvy::dotenv;
 use tracing_subscriber::{fmt, EnvFilter, fmt::format::FmtSpan};
 
+use crate::utils::misc::print_init_art;
+
 pub fn bootstrap() {
     if let Err(e) = dotenv() {
         eprintln!("No .env file found or error loading it: {}", e);
@@ -20,5 +22,5 @@ pub fn bootstrap() {
         .with_span_events(FmtSpan::CLOSE)
         .init();
 
-    tracing::info!(target: "bootstrap", "Hermes Initialized successfully");
+    print_init_art()
 }

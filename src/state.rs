@@ -7,7 +7,7 @@ pub struct AppState {
 }
 
 impl AppState {
-    pub fn new(worker_count: i8) -> Self {
+    pub fn new(worker_count: usize) -> Self {
         AppState {
             box_manager: Arc::new(BoxManager::new(worker_count))
         }

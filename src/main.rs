@@ -3,6 +3,7 @@ mod core;
 mod state;
 mod config;
 mod languages;
+mod utils;
 
 use std::sync::Arc;
 
@@ -10,22 +11,20 @@ use tracing::info;
 use tokio::net::TcpListener;
 
 use state::AppState;
-use config::constants;
-use colored::*;
+use config::constants::{WORKER_COUNT, HOST, PORT};
 
 #[tokio::main(flavor="multi_thread")]
 async fn main() {
     config::bootstrap();
-    let banner = include_str!("../assets/hermes_banner.txt");
 
-    let state = Arc::new(AppState::new(*constants::WORKER_COUNT));
+    let state = Arc::new(AppState::new(*WORKER_COUNT));
     let app = api::create_router(state);
 
-    let addr = format!("{}:{}", *constants::HOST, *constants::PORT);
+    let addr = format!("{}:{}", *HOST, *PORT);
     let listener = TcpListener::bind(&addr).await.unwrap();
 
-    println!("{}", banner.bright_green());
-    info!("Hermes Engine listening on {}", addr);
+
+    info!("Listening on: {}", addr);
 
     axum::serve(listener, app).await.unwrap();
 }
