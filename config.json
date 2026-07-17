@@ -53,7 +53,7 @@
       "-J-XX:+UseCompressedClassPointers",
       "-J-XX:-TieredCompilation",
       "-J-Xshare:auto",
-      "-J-XX:SharedArchiveFile=/tmp/java_share/javac.jsa"
+      "-J-XX:SharedArchiveFile=/jvm_cache/javac.jsa"
     ],
     "runtime_path": "/usr/bin/java",
     "runtime_args": [
@@ -71,11 +71,11 @@
       "-XX:+DisableExplicitGC",
       "-XX:-TieredCompilation",
       "-Xshare:auto",
-      "-XX:SharedArchiveFile=/tmp/java_share/classes.jsa"
+      "-XX:SharedArchiveFile=/jvm_cache/classes.jsa"
     ],
     "isolate_args": [
       "--dir=/etc",
-      "--dir=/tmp/java_share=/tmp/java_share"
+      "--dir=/jvm_cache=/app/jvm_cache"
     ],
     "max_time_limit": 5,
     "max_cpu_time_sec": 5,

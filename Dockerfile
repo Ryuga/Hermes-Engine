@@ -32,16 +32,16 @@ ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 # Cache Pre-Compiled Java STL
-RUN mkdir -p /tmp/java_share && \
-    java -Xshare:dump -XX:SharedArchiveFile=/tmp/java_share/classes.jsa && \
+RUN mkdir -p /app/jvm_cache && \
+    java -Xshare:dump -XX:SharedArchiveFile=/app/jvm_cache/classes.jsa && \
     echo "public class A {}" > /tmp/A.java && \
-    java -XX:DumpLoadedClassList=/tmp/java_share/javac.classlist \
+    java -XX:DumpLoadedClassList=/app/jvm_cache/javac.classlist \
          --add-modules=jdk.compiler \
          -m jdk.compiler/com.sun.tools.javac.Main /tmp/A.java && \
     rm /tmp/A.java /app/A.class 2>/dev/null || true && \
     java -Xshare:dump \
-         -XX:SharedClassListFile=/tmp/java_share/javac.classlist \
-         -XX:SharedArchiveFile=/tmp/java_share/javac.jsa \
+         -XX:SharedClassListFile=/app/jvm_cache/javac.classlist \
+         -XX:SharedArchiveFile=/app/jvm_cache/javac.jsa \
          --add-modules=jdk.compiler
 
 # Setup Isolate Repository
