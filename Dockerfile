@@ -27,6 +27,23 @@ RUN apt-get update && apt-get install -y \
     procps \
     && rm -rf /var/lib/apt/lists/*
 
+# Runtime Environment Setup
+ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
+
+# Cache Pre-Compiled Java STL
+RUN mkdir -p /tmp/java_share && \
+    java -Xshare:dump -XX:SharedArchiveFile=/tmp/java_share/classes.jsa && \
+    echo "public class A {}" > /tmp/A.java && \
+    java -XX:DumpLoadedClassList=/tmp/java_share/javac.classlist \
+         --add-modules=jdk.compiler \
+         -m jdk.compiler/com.sun.tools.javac.Main /tmp/A.java && \
+    rm /tmp/A.java /app/A.class 2>/dev/null || true && \
+    java -Xshare:dump \
+         -XX:SharedClassListFile=/tmp/java_share/javac.classlist \
+         -XX:SharedArchiveFile=/tmp/java_share/javac.jsa \
+         --add-modules=jdk.compiler
+
 # Setup Isolate Repository
 RUN mkdir -p /etc/apt/keyrings && \
     curl https://www.ucw.cz/isolate/debian/signing-key.asc > /etc/apt/keyrings/isolate.asc
@@ -44,10 +61,6 @@ RUN apt-get update && apt-get install -y isolate && rm -rf /var/lib/apt/lists/*
 # Configuration & Permissions
 COPY assets/isolate.conf /etc/isolate
 RUN chown root:root /usr/bin/isolate && chmod 4755 /usr/bin/isolate
-
-# Runtime Environment Setup
-ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
-ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 # Ensure directories match your Rust PathBuf logic
 RUN mkdir -p /tmp && chmod 1777 /tmp && \
