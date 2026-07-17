@@ -44,14 +44,16 @@
       "-J-Xms8m",
       "-J-XX:MaxMetaspaceSize=64m",
       "-J-XX:CompressedClassSpaceSize=8m",
-      "-J-XX:ReservedCodeCacheSize=8m",
+      "-J-XX:ReservedCodeCacheSize=16m",
       "-J-XX:+UseSerialGC",
       "-J-XX:TieredStopAtLevel=1",
       "-J-Xss256k",
       "-J-XX:-UsePerfData",
       "-J-XX:+UseCompressedOops",
       "-J-XX:+UseCompressedClassPointers",
-      "-J-XX:-TieredCompilation"
+      "-J-XX:-TieredCompilation",
+      "-J-Xshare:auto",
+      "-J-XX:SharedArchiveFile=/jvm_cache/javac.jsa"
     ],
     "runtime_path": "/usr/bin/java",
     "runtime_args": [
@@ -59,7 +61,7 @@
       "-Xms8m",
       "-XX:MaxMetaspaceSize=48m",
       "-XX:CompressedClassSpaceSize=8m",
-      "-XX:ReservedCodeCacheSize=8m",
+      "-XX:ReservedCodeCacheSize=16m",
       "-XX:+UseSerialGC",
       "-XX:TieredStopAtLevel=1",
       "-Xss256k",
@@ -67,10 +69,13 @@
       "-XX:+UseCompressedOops",
       "-XX:+UseCompressedClassPointers",
       "-XX:+DisableExplicitGC",
-      "-XX:-TieredCompilation"
+      "-XX:-TieredCompilation",
+      "-Xshare:auto",
+      "-XX:SharedArchiveFile=/jvm_cache/classes.jsa"
     ],
     "isolate_args": [
-      "--dir=/etc"
+      "--dir=/etc",
+      "--dir=/jvm_cache=/app/jvm_cache"
     ],
     "max_time_limit": 5,
     "max_cpu_time_sec": 5,
