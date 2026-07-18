@@ -7,7 +7,7 @@ use crate::core::workers::IsolateBox;
 use crate::config::models::LangConfig;
 use crate::config::constants::IS_DEBUG;
 
-#[instrument(level = "debug")]
+#[instrument(level = "debug", skip(config))]
 pub fn safe_execute(isolate_box: &IsolateBox,
                     config: &LangConfig,
                     run_args: &[String]
