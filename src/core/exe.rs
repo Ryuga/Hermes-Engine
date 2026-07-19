@@ -1,12 +1,16 @@
 use tracing::instrument;
 use crate::languages::get_handler;
 use crate::core::runner::safe_execute;
-use crate::core::workers::IsolateBox;
+use crate::core::workers::{BoxManager, EphemeralBox, PersistentBox};
 use crate::config::models::{ReqMulti, Resp};
 use crate::config::utils::get_lang_config;
 
 #[instrument(level = "debug", skip(passed_token))]
-pub fn execute_code(isolate_box: &IsolateBox, req: ReqMulti, passed_token: Option<String>) -> Result<Resp, String>{
+pub fn execute_code(compiler_pool: &BoxManager<PersistentBox>,
+                    executor_pool: &BoxManager<EphemeralBox>,
+                    req: ReqMulti,
+                    passed_token: Option<String>) -> Result<Resp, String>{
+
     let lang_config = match get_lang_config(&req.language) {
         Ok(config) => config,
         Err(e) => return Ok(
@@ -37,9 +41,11 @@ pub fn execute_code(isolate_box: &IsolateBox, req: ReqMulti, passed_token: Optio
         }
     }
 
+    let executor_box = executor_pool.acquire();
+
     let handler = get_handler(&req.language).map_err(|e| e)?;
 
-    let work_dir = &isolate_box.path;
+    let work_dir = &executor_box.path;
 
     let program = match handler.prepare(work_dir, &req) {
         Ok(p) => p,
@@ -55,7 +61,7 @@ pub fn execute_code(isolate_box: &IsolateBox, req: ReqMulti, passed_token: Optio
 
     if lang_config.compile {
         let compile_args = handler.compile_cmd(&program);
-        let (out, log, code, _) = safe_execute(isolate_box, lang_config, &compile_args)?;
+        let (out, log, code, _) = safe_execute(&executor_box, lang_config, &compile_args)?;
         if code != 0 {
             return Ok(Resp {
                 output: out,
@@ -69,7 +75,9 @@ pub fn execute_code(isolate_box: &IsolateBox, req: ReqMulti, passed_token: Optio
     let run_args = handler.run_cmd(&program);
 
     let (output, std_log, code, time_ms) =
-        safe_execute(&isolate_box, &lang_config, &run_args)?;
+        safe_execute(&executor_box, &lang_config, &run_args)?;
+
+    executor_pool.release(executor_box);
 
     Ok(Resp{output, std_log, code, time_ms})
 }
