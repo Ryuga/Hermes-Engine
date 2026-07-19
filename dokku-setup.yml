@@ -55,8 +55,9 @@
       default: "hermesAPITokenUnsecure"
 
     - name: ALLOWED_ORIGIN
-      prompt: "Enter domain you need CORS (format: https://yourdomain.com)"
+      prompt: "Enter domain you need CORS"
       private: no
+      default: "https://execute.tyxc.org"
 
     - name: RUST_LOG
       prompt: "Enter you preferred log settings (error, warn, info [default], debug, trace, full, off)"

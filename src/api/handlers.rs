@@ -70,11 +70,12 @@ async fn run_execution(state: Arc<AppState>,
 ) -> Result<Resp, StatusCode> {
 
     tokio::task::spawn_blocking(move || {
-        let manager = &state.box_manager;
 
-        let isolate_box = manager.acquire();
-        let run_result = execute_code(&isolate_box, req, auth_token);
-        manager.release(isolate_box);
+        let compiler_pool = Arc::clone(&state.compiler_pool);
+        let executor_pool = Arc::clone(&state.executor_pool);
+
+        let run_result = execute_code(&compiler_pool, &executor_pool, req, auth_token);
+
         run_result
     }).await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?

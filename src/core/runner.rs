@@ -3,12 +3,12 @@ use std::process::Command;
 use tracing::instrument;
 use tokio::time::Instant;
 
-use crate::core::workers::IsolateBox;
+use crate::core::workers::{Sandbox};
 use crate::config::models::LangConfig;
 use crate::config::constants::IS_DEBUG;
 
-#[instrument(level = "debug")]
-pub fn safe_execute(isolate_box: &IsolateBox,
+#[instrument(level = "debug", skip(config))]
+pub fn safe_execute(sand_box: &impl Sandbox,
                     config: &LangConfig,
                     run_args: &[String]
 ) -> Result<(String, String, i32, u128), String> {
@@ -17,7 +17,7 @@ pub fn safe_execute(isolate_box: &IsolateBox,
     let mut cmd = Command::new("isolate");
 
     // Box config
-    cmd.arg("--box-id").arg(&isolate_box.id.to_string());
+    cmd.arg("--box-id").arg(&sand_box.id().to_string());
     cmd.arg("--cg");
 
     cmd.args(&config.isolate_args);
@@ -43,7 +43,7 @@ pub fn safe_execute(isolate_box: &IsolateBox,
 
     // Metafile for job
     // TODO: read exit code
-    let meta_path = format!("/tmp/isolate_{}.meta", isolate_box.id);
+    let meta_path = format!("/tmp/isolate_{}.meta", sand_box.id());
     cmd.arg(format!("--meta={}", &meta_path));
 
     cmd.arg("--run");
